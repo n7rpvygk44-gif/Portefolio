@@ -159,6 +159,8 @@
     background: linear-gradient(135deg, #2a3042, var(--ink) 60%);
     box-shadow: 0 0 0 1px var(--gold), 0 0 12px rgba(243, 192, 99, 0.8);
 }
+.theme-fondation .sound-toggle { padding: 0; border-radius: 50%; letter-spacing: 0; background: var(--surface-strong); backdrop-filter: blur(8px); color: var(--text); border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(80, 60, 20, 0.12); }
+.theme-fondation .sound-toggle[aria-pressed="true"] { border-color: var(--gold); color: var(--accent); box-shadow: 0 0 18px rgba(243, 192, 99, 0.6); }
 .theme-fondation .main-nav a { color: var(--muted); font-size: 0.86rem; font-weight: 500; letter-spacing: 0.04em; }
 .theme-fondation .main-nav ul { column-gap: 0.9rem; }
 .theme-fondation .main-nav a:hover { color: var(--text); }

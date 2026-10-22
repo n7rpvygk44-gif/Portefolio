@@ -8,6 +8,7 @@ Site portfolio pour l'épreuve E5 du BTS SIO option SISR : présentation, parcou
 - **Référencement** : URL propres, balises meta et Open Graph, `sitemap.xml` et `robots.txt` générés
 - **Accessibilité** : panneau de réglages (texte agrandi, contraste, lecture facilitée, animations), navigation au clavier
 - **Thèmes interchangeables**, choisis depuis le backoffice
+- **Ambiance sonore** (`public/assets/js/sound.js`) : sons synthétisés en direct (Web Audio API, aucun fichier audio), dans l'esprit des tableaux de bord épurés en verre et aluminium. Rituel de démarrage à l'activation, nappe d'ambiance discrète, déclics et effleurements sur les liens et boutons, tintements quand le thème Fondation déploie l'interface. Coupé par défaut ; bouton rond en bas à gauche, choix mémorisé dans le navigateur.
 
 ## Organisation des fichiers
 

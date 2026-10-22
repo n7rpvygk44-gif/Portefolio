@@ -147,6 +147,7 @@
     function reveal(el) {
         el.style.setProperty('--i', String(Math.min(wave++, 12)));
         el.classList.add('is-in');
+        document.dispatchEvent(new CustomEvent('portfolio:reveal'));
         // Les éléments suivants qui apparaissent au défilement ne patientent pas.
         clearTimeout(reveal.timer);
         reveal.timer = setTimeout(() => { wave = 0; }, 200);

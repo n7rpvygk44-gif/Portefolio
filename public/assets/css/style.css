@@ -98,6 +98,31 @@ main:focus { outline: none; }
     .main-nav ul { flex-direction: column; }
 }
 
+/* ===== Bouton du son ===== */
+.sound-toggle {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 90;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+.sound-toggle .sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sound-toggle .sound-icon { width: 1.1rem; height: 1.1rem; display: inline-block; background: currentColor; -webkit-mask: var(--sound-off) center / contain no-repeat; mask: var(--sound-off) center / contain no-repeat; }
+.sound-toggle[aria-pressed="true"] .sound-icon { -webkit-mask-image: var(--sound-on); mask-image: var(--sound-on); }
+:root {
+    --sound-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9h4l5-4v14l-5-4H3z'/%3E%3Cpath d='M16 9l6 6M22 9l-6 6' stroke='black' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    --sound-on: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9h4l5-4v14l-5-4H3z'/%3E%3Cpath d='M16 8.5a5 5 0 0 1 0 7M19 5.5a9 9 0 0 1 0 13' stroke='black' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+}
+
 /* ===== Panneau d'accessibilité ===== */
 .a11y { background: var(--surface); border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 .a11y summary { cursor: pointer; padding: 0.4rem 0; color: var(--muted); }
@@ -178,7 +203,7 @@ td.check { text-align: center; color: var(--accent); font-weight: 700; }
 
 /* ===== Impression (tableau de synthèse en PDF) ===== */
 @media print {
-    .site-header, .a11y, .site-footer, .skip-link, .search { display: none; }
+    .site-header, .a11y, .site-footer, .skip-link, .search, .sound-toggle { display: none; }
     body { background: #fff; color: #000; }
     a { color: #000; text-decoration: none; }
 }

@@ -30,6 +30,7 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
         <link rel="stylesheet" href="<?= e(url('/assets/css/themes/' . $theme . '.css')) ?>">
     <?php endif; ?>
     <script src="<?= e(url('/assets/js/main.js')) ?>" defer></script>
+    <script src="<?= e(url('/assets/js/sound.js')) ?>" defer></script>
     <?php if (Theme::hasScript($theme)): ?>
         <script src="<?= e(url('/assets/js/themes/' . $theme . '.js')) ?>" defer></script>
     <?php endif; ?>
@@ -59,6 +60,8 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
 <main id="contenu" class="container" tabindex="-1">
     <?= $content ?>
 </main>
+
+<button class="sound-toggle" type="button" aria-pressed="false" title="Activer le son du site"><span class="sound-icon" aria-hidden="true"></span><span class="sound-label">Son coupé</span></button>
 
 <footer class="site-footer">
     <div class="container">

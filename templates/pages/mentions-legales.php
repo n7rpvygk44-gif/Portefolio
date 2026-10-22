@@ -20,7 +20,7 @@
 <h2>Données personnelles et cookies</h2>
 <p>
     Ce site ne collecte aucune donnée personnelle : il n'a pas de formulaire, pas de mesure d'audience et ne dépose aucun cookie.
-    Les réglages d'accessibilité choisis (taille du texte, contraste…) sont enregistrés uniquement dans votre navigateur et ne sont envoyés nulle part.
+    Les réglages choisis (accessibilité, son activé ou coupé) sont enregistrés uniquement dans votre navigateur et ne sont envoyés nulle part.
 </p>
 <p>L'hébergeur peut conserver des journaux techniques de connexion (adresse IP, date), comme tout serveur web.</p>
 
