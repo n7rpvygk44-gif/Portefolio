@@ -1,0 +1,276 @@
+/* =====================================================================
+   Thème « Seldon » : Metal Gear Solid (écran de codec, HUD, alertes)
+   × Matrix (vert phosphore, pluie de caractères)
+   × Fondation d'Asimov (ciel galactique, Radiant de Hari Seldon, Terminus,
+   Encyclopédie Galactique, équations de psychohistoire).
+   Ce fichier ne fait que surcharger style.css : le supprimer rend le style de base.
+   ===================================================================== */
+
+.theme-seldon {
+    --bg: #01040a;
+    --surface: rgba(3, 14, 18, 0.86);
+    --text: #b8f5c8;
+    --muted: #6fbf88;
+    --border: #1f6b3a;
+    --accent: #39ff7a;
+    --accent-text: #00140a;
+    --code-bg: #04200f;
+    --focus: #ffb000;
+    --alert: #ff4d3a;
+    --gold: #e8c26a;         /* or impérial de Trantor */
+    --radiant: #5fd4ff;      /* lueur du Radiant de Seldon */
+    --glow: 0 0 6px rgba(57, 255, 122, 0.55);
+    --radius: 0;
+    --font: "Cascadia Mono", "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", "Courier New", monospace;
+    color-scheme: dark;
+}
+
+/* Réglages d'accessibilité : ils restent prioritaires sur le thème. */
+.a11y-readable .theme-seldon { --font: Verdana, Tahoma, sans-serif; }
+.a11y-contrast .theme-seldon { --text: #ffffff; --muted: #ffffff; --bg: #000; --surface: #000; --border: #39ff7a; --accent: #7dffa6; --glow: none; }
+.theme-seldon [data-a11y="theme"] { display: none; } /* thème toujours sombre */
+
+/* ----- Fond : lignes de balayage d'écran CRT + vignette ----- */
+.theme-seldon {
+    background:
+        radial-gradient(ellipse 60% 40% at 80% 10%, rgba(95, 212, 255, 0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 10% 90%, rgba(140, 90, 220, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse at center, rgba(0, 40, 18, 0.25) 0%, rgba(0, 0, 0, 0.85) 100%),
+        var(--bg);
+    background-attachment: fixed;
+}
+.theme-seldon::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.18) 3px);
+}
+.a11y-contrast .theme-seldon::after,
+.a11y-readable .theme-seldon::after { display: none; }
+
+/* Pluie de caractères (créée par assets/js/themes/codec.js) */
+.matrix-rain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.22;
+}
+
+/* ----- Typographie ----- */
+.theme-seldon h1,
+.theme-seldon h2,
+.theme-seldon h3 {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-shadow: var(--glow);
+    font-weight: 700;
+}
+.theme-seldon h1::before { content: "> " / ""; color: var(--muted); }
+.theme-seldon ::selection { background: var(--accent); color: var(--accent-text); }
+.theme-seldon a { color: var(--accent); text-underline-offset: 3px; }
+.theme-seldon a:hover { text-shadow: var(--glow); }
+
+/* ----- En-tête façon HUD ----- */
+.theme-seldon .site-header {
+    background: rgba(0, 10, 4, 0.92);
+    border-bottom: 1px solid var(--accent);
+    box-shadow: 0 1px 12px rgba(57, 255, 122, 0.25);
+}
+.theme-seldon .brand {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-shadow: var(--glow);
+}
+.theme-seldon .brand::after {
+    content: "FREQ 140.85 · TERMINUS" / "";
+    margin-left: 0.75rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    vertical-align: middle;
+}
+.theme-seldon .main-nav a { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em; }
+.theme-seldon .main-nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); text-shadow: var(--glow); }
+.theme-seldon .main-nav a[aria-current="page"]::before { content: "▶ " / ""; }
+
+.theme-seldon .a11y { background: rgba(0, 10, 4, 0.92); border-bottom-color: var(--border); }
+
+/* ----- Panneaux façon écran de codec (coins coupés) ----- */
+.theme-seldon .card,
+.theme-seldon .competence,
+.theme-seldon .facts,
+.theme-seldon .login {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.theme-seldon .card:hover,
+.theme-seldon .card:focus-within {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 18px rgba(57, 255, 122, 0.18);
+}
+.theme-seldon .card h3::before { content: "◆ " / ""; color: var(--muted); }
+
+/* ----- Accueil : appel codec entrant ----- */
+.theme-seldon .hero {
+    position: relative;
+    margin-top: 1rem;
+    padding: 2.5rem 1.5rem 1.5rem;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 24px rgba(57, 255, 122, 0.15), inset 0 0 40px rgba(57, 255, 122, 0.08);
+}
+.theme-seldon .hero::before {
+    content: "// CODEC CALL : INCOMING · PLAN SELDON" / "";
+    position: absolute;
+    top: 0.6rem;
+    left: 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--alert);
+    animation: codec-blink 1.2s steps(2, start) infinite;
+}
+.theme-seldon .hero h1 { font-size: 2.4rem; margin: 0.5rem 0 0.25rem; }
+.theme-seldon .hero h1::after {
+    content: "_" / "";
+    margin-left: 0.15em;
+    animation: codec-blink 1s steps(2, start) infinite;
+}
+.theme-seldon .subtitle { color: var(--focus); letter-spacing: 0.1em; text-transform: uppercase; }
+
+@keyframes codec-blink {
+    to { visibility: hidden; }
+}
+
+/* ----- Boutons ----- */
+.theme-seldon button,
+.theme-seldon .button {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+}
+.theme-seldon button:hover,
+.theme-seldon .button:hover,
+.theme-seldon .a11y button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-text);
+    box-shadow: var(--glow);
+}
+
+/* ----- Formulaires ----- */
+.theme-seldon input,
+.theme-seldon textarea,
+.theme-seldon select {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--border);
+    color: var(--text);
+    caret-color: var(--accent);
+}
+.theme-seldon input:focus,
+.theme-seldon textarea:focus,
+.theme-seldon select:focus { border-color: var(--accent); }
+
+/* ----- Étiquettes, tableaux, encadrés ----- */
+.theme-seldon .code { background: var(--accent); color: var(--accent-text); border-radius: 0; }
+.theme-seldon .tags li { border-color: var(--accent); border-radius: 0; color: var(--accent); }
+.theme-seldon .related { border-left-color: var(--alert); }
+.theme-seldon .related h2::before { content: "! " / ""; color: var(--alert); }
+.theme-seldon table { background: rgba(0, 10, 4, 0.85); }
+.theme-seldon th, .theme-seldon td { border-color: var(--border); }
+.theme-seldon thead th { background: rgba(57, 255, 122, 0.12); color: var(--accent); }
+.theme-seldon pre { border-left: 3px solid var(--accent); }
+
+.theme-seldon .site-footer { border-top-color: var(--border); background: rgba(0, 10, 4, 0.92); }
+.theme-seldon .site-footer p::before { content: "[ ENCYCLOPÉDIE GALACTIQUE · CONNEXION SÉCURISÉE ] " / ""; color: var(--muted); }
+
+/* Animations coupées si l'utilisateur le demande */
+.a11y-motion .theme-seldon .hero::before,
+.a11y-motion .theme-seldon .hero h1::after { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+    .theme-seldon .hero::before,
+    .theme-seldon .hero h1::after { animation: none; }
+}
+
+@media print {
+    .theme-seldon { background: #fff; --text: #000; --accent: #000; --surface: #fff; --border: #000; }
+    .theme-seldon::after, .matrix-rain { display: none; }
+    .theme-seldon h1, .theme-seldon h2, .theme-seldon h3 { text-shadow: none; }
+}
+
+
+/* =====================================================================
+   Couche « Fondation »
+   ===================================================================== */
+
+/* Sous-titres en or impérial, façon Encyclopédie Galactique */
+.theme-seldon h2 { color: var(--gold); text-shadow: 0 0 6px rgba(232, 194, 106, 0.45); }
+.theme-seldon h2::before { content: "§ " / ""; color: var(--muted); text-shadow: none; }
+.theme-seldon .subtitle { color: var(--gold); }
+
+/* Radiant de Hari Seldon : anneaux d'équations qui tournent dans l'appel codec */
+.theme-seldon .hero { overflow: hidden; }
+.theme-seldon .hero > * { position: relative; z-index: 1; }
+.theme-seldon .hero::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -40px;
+    width: 280px;
+    height: 280px;
+    margin-top: -140px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.55;
+    background:
+        radial-gradient(circle, rgba(95, 212, 255, 0.55) 0 6%, transparent 7%),
+        repeating-radial-gradient(circle, transparent 0 22px, rgba(95, 212, 255, 0.35) 23px 24px),
+        conic-gradient(from 0deg, transparent 0 20%, rgba(232, 194, 106, 0.35) 25%, transparent 30% 60%, rgba(57, 255, 122, 0.3) 65%, transparent 70%);
+    -webkit-mask: radial-gradient(circle, #000 60%, transparent 71%);
+    mask: radial-gradient(circle, #000 60%, transparent 71%);
+    animation: radiant-spin 40s linear infinite;
+}
+@keyframes radiant-spin {
+    to { transform: rotate(360deg); }
+}
+@media (max-width: 760px) {
+    .theme-seldon .hero::after { width: 180px; height: 180px; margin-top: -90px; right: -70px; opacity: 0.35; }
+}
+
+/* Fiches façon entrées de l'Encyclopédie : liseré or en haut */
+.theme-seldon .card { border-top: 2px solid var(--gold); }
+.theme-seldon .card:hover,
+.theme-seldon .card:focus-within { box-shadow: inset 0 0 18px rgba(95, 212, 255, 0.15); }
+.theme-seldon .card h3::before { content: "✦ " / ""; color: var(--gold); }
+.theme-seldon .competence { border-left: 3px solid var(--gold); }
+.theme-seldon thead th { color: var(--gold); }
+.theme-seldon .breadcrumb::before { content: "ENCYCLOPÉDIE › " / ""; color: var(--gold); letter-spacing: 0.08em; }
+
+.a11y-motion .theme-seldon .hero::after { animation: none; }
+.a11y-contrast .theme-seldon .hero::after { display: none; }
+.a11y-contrast .theme-seldon { --gold: #ffd75e; }
+@media (prefers-reduced-motion: reduce) {
+    .theme-seldon .hero::after { animation: none; }
+}
+@media print {
+    .theme-seldon .hero::after { display: none; }
+    .theme-seldon h2 { color: #000; text-shadow: none; }
+}
+
+/* Ciel étoilé (assets/js/themes/seldon.js) : plus visible que la pluie */
+.matrix-rain.galaxy-sky { opacity: 0.85; }
+.a11y-contrast .theme-seldon h1,
+.a11y-contrast .theme-seldon h2,
+.a11y-contrast .theme-seldon h3 { text-shadow: none; }

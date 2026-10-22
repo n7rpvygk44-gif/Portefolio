@@ -13,6 +13,7 @@ final class Theme
     public const LABELS = [
         'defaut' => 'Sobre (par défaut)',
         'codec' => 'Codec : Metal Gear Solid × Matrix',
+        'seldon' => 'Seldon : Metal Gear Solid × Matrix × Fondation',
     ];
 
     public static function available(): array
