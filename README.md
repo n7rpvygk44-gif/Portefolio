@@ -8,7 +8,7 @@ Site portfolio pour l'épreuve E5 du BTS SIO option SISR : présentation, parcou
 - **Référencement** : URL propres, balises meta et Open Graph, `sitemap.xml` et `robots.txt` générés
 - **Accessibilité** : panneau de réglages (texte agrandi, contraste, lecture facilitée, animations), navigation au clavier
 - **Thèmes interchangeables**, choisis depuis le backoffice
-- **Ambiance sonore** (`public/assets/js/sound.js`) : sons synthétisés en direct (Web Audio API, aucun fichier audio), dans l'esprit des tableaux de bord épurés en verre et aluminium. Rituel de démarrage à l'activation, nappe d'ambiance discrète, déclics et effleurements sur les liens et boutons, tintements quand le thème Fondation déploie l'interface. Coupé par défaut ; bouton rond en bas à gauche, choix mémorisé dans le navigateur.
+- **Ambiance sonore** (`public/assets/js/sound.js`) : sons synthétisés en direct (Web Audio API, aucun fichier audio), dans l'esprit des tableaux de bord épurés en verre et aluminium. Rituel de démarrage à l'activation, bande-son synchronisée avec l'introduction du Radiant, nappe d'ambiance, déclics et effleurements sur les liens et boutons, tintements quand le thème Fondation déploie l'interface. Coupé par défaut ; bouton rond en bas à gauche, choix mémorisé dans le navigateur.
 
 ## Organisation des fichiers
 
@@ -81,7 +81,7 @@ Thèmes fournis :
 - `defaut` : sobre, clair ou sombre
 - `codec` : univers Metal Gear Solid (écran de codec, HUD) et Matrix (vert phosphore, pluie de caractères). La pluie se coupe avec « Réduire les animations » ou le contraste renforcé.
 - `seldon` : `codec` + univers de *Fondation* d'Asimov (ciel galactique, Radiant de Hari Seldon, Terminus, Encyclopédie Galactique, symboles de psychohistoire dans la pluie).
-- `fondation` (actif) : thème clair inspiré de l'esthétique de la série *Fondation* (Apple TV+) : ivoire, or et encre, titres en capitales espacées, Trantor seule dans le ciel. Le **Radiant** (losange d'obsidienne d'où se déploient des sphères d'équations en 3D) ouvre la visite par une courte introduction (une fois par visite, bouton « Passer l'introduction »), puis « projette » les éléments de l'interface qui se déploient à l'écran ; sur l'accueil, les 6 compétences jaillissent de son cœur. Sans JavaScript ou avec « Réduire les animations », tout s'affiche directement. Illustrations originales (aucun visuel de la série).
+- `fondation` (actif) : thème clair inspiré de l'esthétique de la série *Fondation* (Apple TV+) : ivoire, or et encre, titres en capitales espacées, Trantor seule dans le ciel. Le **Radiant** (losange d'obsidienne d'où se déploient des sphères d'équations en 3D) ouvre la visite par une introduction d'environ 9 secondes, une fois par visite : le visiteur choisit « Activer le Radiant » (avec la bande-son) ou « Entrer sans le son », et peut la passer (bouton ou Échap), puis « projette » les éléments de l'interface qui se déploient à l'écran ; sur l'accueil, les 6 compétences jaillissent de son cœur. Sans JavaScript ou avec « Réduire les animations », tout s'affiche directement. Illustrations originales (aucun visuel de la série).
 - `fondation-technique` : la version précédente, claire et technique (grille de plan, HUD, planètes, vaisseau de Seldon).
 - `fondation-classique` : la version claire précédente (titres à empattements), conservée pour comparer.
 - `fondation-nuit` : l'ancienne version sombre (espace profond, pluie d'équations).

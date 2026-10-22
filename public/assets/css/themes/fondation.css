@@ -376,40 +376,60 @@
    si les animations sont autorisées : sans JavaScript, tout reste visible).
    ===================================================================== */
 
-/* 1. Introduction : le Radiant s'active et déploie ses sphères d'équations */
+/* 1. Introduction : le Radiant attend d'être activé, puis déploie ses sphères d'équations.
+      Durées alignées sur TIMELINE dans fondation.js (anneaux à 1,6 / 2,4 / 3,2 / 4 s, fin à 8 s). */
 .radiant-intro {
     position: fixed;
     inset: 0;
     z-index: 100;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 50% 50%, #fffaf0 0%, #f6f2ea 45%, #ebe3d3 100%);
+    background: radial-gradient(circle at 50% 45%, #fffaf0 0%, #f6f2ea 45%, #e9e0cf 100%);
     perspective: 1000px;
-    animation: intro-out 0.9s ease-in 2.5s forwards;
 }
+.radiant-intro.active { animation: intro-out 0.9s ease-in 8s forwards; }
 .radiant-intro .stage {
     position: relative;
     width: min(70vmin, 560px);
     aspect-ratio: 1;
     transform-style: preserve-3d;
-    animation: stage-turn 3.4s cubic-bezier(0.3, 0.6, 0.2, 1) forwards;
+    transform: rotateY(-40deg) rotateX(18deg);
 }
-.radiant-intro .ring { opacity: 0; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(0.05); animation: ring-open 1.6s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; animation-delay: var(--delay, 0.5s); }
-.radiant-intro .radiant-core { animation: core-wake 1s ease-out forwards; }
+.radiant-intro.active .stage { animation: stage-turn 9s cubic-bezier(0.3, 0.6, 0.2, 1) forwards; }
+.radiant-intro .ring { opacity: 0; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(0.05); }
+.radiant-intro.active .ring { animation: ring-open 2.4s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; animation-delay: var(--delay, 1.6s); }
+/* En attente : le Radiant est éteint, il respire à peine */
+.radiant-intro .radiant-core { cursor: pointer; box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.5), 0 0 24px rgba(243, 192, 99, 0.25); animation: core-sleep 3s ease-in-out infinite; }
+.radiant-intro.active .radiant-core { animation: core-wake 1.6s ease-out forwards, core-pulse 5s ease-in-out 1.6s infinite; }
 .radiant-intro .title {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 12vh;
+    top: 9vh;
     text-align: center;
     font: 400 0.8rem/1.8 var(--display);
     letter-spacing: 0.6em;
     text-transform: uppercase;
     color: var(--text);
-    opacity: 0;
-    animation: title-in 1.2s ease-out 1.1s forwards;
+    animation: title-in 2s ease-out 0.3s both;
 }
 .radiant-intro .title span { display: block; color: var(--accent); font-size: 0.68rem; letter-spacing: 0.45em; }
+.radiant-intro .gate {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10vh;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0 1rem;
+}
+.radiant-intro .gate .hint { flex-basis: 100%; margin: 0.25rem 0 0; text-align: center; font-size: 0.78rem; letter-spacing: 0.08em; color: var(--muted); }
+.radiant-intro .activate { background: var(--ink); color: #fbf3e2; border: 1px solid var(--ink); box-shadow: 0 0 0 1px var(--gold), 0 10px 30px rgba(200, 149, 47, 0.35); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.8rem; padding: 0.8rem 1.5rem; }
+.radiant-intro .activate:hover { color: var(--glow); }
+.radiant-intro .silent { background: transparent; color: var(--text); border: 1px solid rgba(21, 25, 37, 0.3); letter-spacing: 0.1em; font-size: 0.8rem; padding: 0.8rem 1.2rem; }
+.radiant-intro.active .gate { animation: gate-out 0.6s ease-in forwards; }
 .radiant-intro .skip {
     position: absolute;
     right: 1.25rem;
@@ -420,18 +440,20 @@
     font-size: 0.78rem;
     padding: 0.4rem 0.8rem;
 }
+@keyframes core-sleep { 50% { box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.8), 0 0 40px rgba(243, 192, 99, 0.45); } }
 @keyframes core-wake {
-    0% { transform: rotate(45deg) scale(0.4); box-shadow: 0 0 0 1px rgba(200, 149, 47, 0); }
-    60% { transform: rotate(45deg) scale(1.05); box-shadow: 0 0 0 1px var(--glow), 0 0 140px 40px rgba(243, 192, 99, 0.9); }
+    0% { transform: rotate(45deg) scale(0.9); box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.5); }
+    70% { transform: rotate(45deg) scale(1.08); box-shadow: 0 0 0 1px var(--glow), 0 0 160px 50px rgba(243, 192, 99, 0.9); }
     100% { transform: rotate(45deg) scale(1); box-shadow: 0 0 0 1px var(--gold), 0 0 70px 14px rgba(243, 192, 99, 0.6); }
 }
 @keyframes ring-open {
     0% { opacity: 0; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(0.05); }
-    30% { opacity: 1; }
+    25% { opacity: 1; }
     100% { opacity: 1; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(1); }
 }
-@keyframes stage-turn { from { transform: rotateY(-40deg) rotateX(18deg); } to { transform: rotateY(25deg) rotateX(8deg); } }
+@keyframes stage-turn { from { transform: rotateY(-40deg) rotateX(18deg); } to { transform: rotateY(40deg) rotateX(6deg); } }
 @keyframes title-in { from { opacity: 0; letter-spacing: 1.2em; } to { opacity: 1; letter-spacing: 0.6em; } }
+@keyframes gate-out { to { opacity: 0; transform: translateY(12px); visibility: hidden; } }
 @keyframes intro-out { to { opacity: 0; transform: scale(1.6); filter: blur(8px); visibility: hidden; } }
 
 /* 2. Déploiement de l'interface : chaque élément est « projeté » par le Radiant */
@@ -490,3 +512,9 @@
     .theme-fondation .site-header { position: static; }
     .fx .fx-item, .fx .radiant-nodes li { opacity: 1 !important; transform: none !important; filter: none !important; }
 }
+
+/* Anneaux de l'introduction plus lumineux, pour bien distinguer l'animation */
+.radiant-intro .ring circle { stroke-width: 0.4; opacity: 0.9; }
+.radiant-intro .ring circle.dash { stroke-width: 1; opacity: 0.7; }
+.radiant-intro .ring text { fill: #8a5a12; font-weight: 600; }
+.radiant-intro .ring svg { filter: drop-shadow(0 0 2px rgba(243, 192, 99, 0.8)); }

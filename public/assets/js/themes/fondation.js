@@ -196,12 +196,15 @@
         return;
     }
 
+    // Le Radiant attend d'être activé : ce geste permet aussi au navigateur de jouer le son
+    // (rituel de démarrage, comme une clé qu'on insère). Durées alignées sur fondation.css.
+    const TIMELINE = { wake: 1.4, rings: [1.6, 2.4, 3.2, 4.0], end: 8 };
     const intro = document.createElement('div');
     intro.className = 'radiant-intro';
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    stage.append(sphere('sphere', [0.5, 0.7, 0.9, 1.1]), core());
+    stage.append(sphere('sphere', TIMELINE.rings), core());
     // Les anneaux de l'introduction sont posés directement dans la scène.
     const introSphere = stage.firstChild;
     while (introSphere.firstChild) {
@@ -216,14 +219,32 @@
     const sub = document.createElement('span');
     sub.textContent = 'Plan Seldon · Portfolio';
     title.appendChild(sub);
+
+    const gate = document.createElement('div');
+    gate.className = 'gate';
+    const activate = document.createElement('button');
+    activate.type = 'button';
+    activate.className = 'activate';
+    activate.textContent = 'Activer le Radiant';
+    const silent = document.createElement('button');
+    silent.type = 'button';
+    silent.className = 'silent';
+    silent.textContent = 'Entrer sans le son';
+    const hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = 'Expérience sonore : activez le son de votre appareil';
+    gate.append(activate, silent, hint);
+
     const skip = document.createElement('button');
     skip.type = 'button';
     skip.className = 'skip';
     skip.textContent = 'Passer l\'introduction';
-    intro.append(stage, title, skip);
+    intro.append(stage, title, gate, skip);
     document.body.appendChild(intro);
+    activate.focus({ preventScroll: true });
 
     let done = false;
+    let running = false;
     function finish() {
         if (done) {
             return;
@@ -233,14 +254,32 @@
         document.removeEventListener('keydown', onKey);
         start();
     }
+    function run(withSound) {
+        if (running) {
+            return;
+        }
+        running = true;
+        intro.classList.add('active');
+        if (window.portfolioSound) {
+            if (withSound) {
+                window.portfolioSound.playIntro(TIMELINE);
+            } else {
+                window.portfolioSound.disable();
+            }
+        }
+        skip.focus({ preventScroll: true });
+        // Le déploiement de l'interface commence pendant que l'introduction s'efface.
+        setTimeout(start, (TIMELINE.end + 0.1) * 1000);
+        setTimeout(finish, (TIMELINE.end + 0.9) * 1000);
+    }
     function onKey(event) {
-        if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+        if (event.key === 'Escape') {
             finish();
         }
     }
-    intro.addEventListener('click', finish);
+    activate.addEventListener('click', () => run(true));
+    silent.addEventListener('click', () => run(false));
+    stage.addEventListener('click', () => run(true));
+    skip.addEventListener('click', finish);
     document.addEventListener('keydown', onKey);
-    // Le déploiement de l'interface commence pendant que l'introduction s'efface.
-    setTimeout(start, 2600);
-    setTimeout(finish, 3400);
 })();
