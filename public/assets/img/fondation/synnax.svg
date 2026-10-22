@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" role="img" aria-label="Synnax">
+  <!-- Synnax, monde océanique natal de Gaal Dornick (illustration originale) -->
+  <defs>
+    <radialGradient id="sy-body" cx="36%" cy="34%" r="72%">
+      <stop offset="0" stop-color="#e4f0ff"/>
+      <stop offset="0.45" stop-color="#6f8fd8"/>
+      <stop offset="0.85" stop-color="#2d3f8f"/>
+      <stop offset="1" stop-color="#1a2358"/>
+    </radialGradient>
+    <clipPath id="sy-clip"><circle cx="120" cy="120" r="85"/></clipPath>
+    <filter id="sy-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <circle cx="120" cy="120" r="92" fill="#b9c8ff" opacity="0.55" filter="url(#sy-glow)"/>
+  <circle cx="120" cy="120" r="85" fill="url(#sy-body)"/>
+  <g clip-path="url(#sy-clip)" fill="none" stroke="#dfe8ff" stroke-width="2" opacity="0.55">
+    <path d="M30 80c30-10 60 10 90 0s60-10 90 0"/>
+    <path d="M30 110c30-10 60 10 90 0s60-10 90 0"/>
+    <path d="M30 140c30-10 60 10 90 0s60-10 90 0"/>
+    <path d="M30 170c30-10 60 10 90 0s60-10 90 0"/>
+  </g>
+  <text x="120" y="262" text-anchor="middle" font-family="Georgia, serif" font-size="18" letter-spacing="6" fill="#2d3f8f">SYNNAX</text>
+</svg>

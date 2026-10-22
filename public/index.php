@@ -50,8 +50,11 @@ $name = $profile['nom'] ?? '';
 
 switch (true) {
     case $path === '/':
+        $all = $store->read('realisations');
         View::render('pages/home', $page('Accueil', $profile['accroche'] ?? '') + [
-            'realisations' => array_slice($store->read('realisations'), 0, 3),
+            'realisations' => array_slice($all, 0, 3),
+            'allRealisations' => $all,
+            'competences' => $store->read('competences'),
         ]);
         break;
 

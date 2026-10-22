@@ -31,6 +31,12 @@ function page_path(string $path): string
     return implode('?', $parts);
 }
 
+// Ancre d'une compétence dans la page Compétences (ex. B1.1 -> b1-1).
+function competence_anchor(string $code): string
+{
+    return strtolower(str_replace('.', '-', $code));
+}
+
 final class View
 {
     // Affiche templates/<template>.php à l'intérieur du gabarit général (layout).

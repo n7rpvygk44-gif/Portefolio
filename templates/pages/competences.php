@@ -3,7 +3,7 @@
 
 <?php foreach ($competences as $c): ?>
     <?php $linked = array_filter($realisations, fn ($r) => in_array($c['code'], $r['competences'] ?? [], true)); ?>
-    <section class="competence">
+    <section class="competence" id="<?= e(competence_anchor($c['code'])) ?>">
         <h2><span class="code"><?= e($c['code']) ?></span> <?= e($c['titre']) ?></h2>
         <ul>
             <?php foreach ($c['details'] as $d): ?>

@@ -1,91 +1,103 @@
 /* =====================================================================
-   Thème « Fondation » : univers de Fondation d'Asimov en dominante
-   (Empire galactique, or de Trantor, Radiant de Hari Seldon, Terminus,
-   Encyclopédie Galactique), avec des touches de Death Stranding 2 de Hideo Kojima
-   (réseau chiral, liens entre les étoiles, interface holographique) et de Matrix
-   (pluie d'équations de psychohistoire).
+   Thème « Fondation » (clair) : univers de Fondation d'Asimov.
+   - Ciel d'aube galactique, or impérial, bleu du Radiant
+   - Planètes de l'univers : Trantor, Terminus, Synnax (illustrations originales)
+   - Le vaisseau de Seldon qui traverse le ciel
+   - Le Radiant : le plan des compétences en orbite sur la page d'accueil
+   Touches : Death Stranding 2 (liens entre les planètes, réseau chiral)
+   et Matrix (équations qui défilent dans les anneaux du Radiant).
    Ce fichier ne fait que surcharger style.css : le supprimer rend le style de base.
    ===================================================================== */
 
 .theme-fondation {
-    --bg: #03060f;
-    --surface: rgba(10, 18, 36, 0.82);
-    --text: #dfe6f3;
-    --muted: #9aa8c2;
-    --border: #2c3a5c;
-    --accent: #e8c26a;       /* or impérial de Trantor */
-    --accent-text: #0a0f1c;
-    --code-bg: #0e1830;
-    --focus: #5fd4ff;
-    --radiant: #5fd4ff;      /* lueur du Radiant de Seldon */
-    --holo: #a8e6ff;         /* interface holographique de Death Stranding */
-    --alert: #ff6b57;
-    --glow: 0 0 10px rgba(232, 194, 106, 0.35);
-    --radius: 2px;
+    --bg: #f5f1e8;
+    --surface: rgba(255, 255, 255, 0.88);
+    --text: #1d2440;
+    --muted: #4f5873;
+    --border: #ddd3bf;
+    --accent: #8a6414;       /* or impérial (foncé pour rester lisible sur fond clair) */
+    --accent-text: #ffffff;
+    --gold: #d9ae4f;         /* or décoratif */
+    --radiant: #1f63a8;      /* bleu du Radiant */
+    --holo: #3a8fc4;         /* liens du réseau chiral (Death Stranding) */
+    --code-bg: #efe8d8;
+    --focus: #1f63a8;
+    --radius: 6px;
     --font: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
     --title-font: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-    --hud-font: "Cascadia Mono", Consolas, "Liberation Mono", "Courier New", monospace;
-    color-scheme: dark;
+    color-scheme: light;
 }
 
 /* Réglages d'accessibilité : ils restent prioritaires sur le thème. */
 .a11y-readable .theme-fondation { --font: Verdana, Tahoma, sans-serif; --title-font: Verdana, Tahoma, sans-serif; }
-.a11y-contrast .theme-fondation { --text: #fff; --muted: #fff; --bg: #000; --surface: #000; --border: #e8c26a; --accent: #ffd75e; --glow: none; }
-.theme-fondation [data-a11y="theme"] { display: none; } /* thème toujours sombre */
+.a11y-contrast .theme-fondation { --text: #000; --muted: #000; --surface: #fff; --border: #000; --accent: #5c3f00; --radiant: #003c8f; }
+.theme-fondation [data-a11y="theme"] { display: none; } /* thème clair uniquement */
 
-/* ----- Fond : espace profond, nébuleuses de la Galaxie ----- */
+/* ----- Ciel d'aube galactique ----- */
 .theme-fondation {
     background:
-        radial-gradient(ellipse 70% 45% at 85% 0%, rgba(95, 212, 255, 0.10) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(120, 80, 200, 0.14) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 30% at 50% 50%, rgba(232, 194, 106, 0.05) 0%, transparent 70%),
-        var(--bg);
+        radial-gradient(ellipse 60% 45% at 15% 0%, rgba(255, 226, 160, 0.55) 0%, transparent 70%),
+        radial-gradient(ellipse 55% 40% at 95% 30%, rgba(190, 210, 255, 0.55) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(230, 210, 245, 0.45) 0%, transparent 70%),
+        linear-gradient(180deg, #e3edf8 0%, #f5f1e8 55%, #f3ece0 100%);
     background-attachment: fixed;
 }
 
-/* Calques animés (assets/js/themes/fondation.js) */
-.space-layer { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-.space-layer.stars { opacity: 0.95; }
-.space-layer.equations { opacity: 0.16; }
+/* ----- Décor : planètes, liens du réseau chiral et vaisseau (créés par fondation.js) ----- */
+.fondation-scene { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.fondation-scene img { position: absolute; height: auto; }
+.fondation-scene .trantor { width: min(36vw, 520px); right: -7vw; top: 7vh; }
+.fondation-scene .terminus { width: min(20vw, 300px); left: -3vw; bottom: 3vh; }
+.fondation-scene .synnax { width: min(10vw, 150px); left: 3vw; top: 24vh; opacity: 0.9; }
+.fondation-scene .strands { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fondation-scene .strands line { stroke: var(--holo); stroke-width: 1.2; stroke-dasharray: 3 7; opacity: 0.55; }
+.fondation-scene .vaisseau {
+    width: min(18vw, 220px);
+    top: 15vh;
+    left: 0;
+    animation: seldon-flight 45s linear infinite;
+}
+@keyframes seldon-flight {
+    0% { transform: translateX(-25vw) translateY(0) rotate(-4deg); }
+    50% { transform: translateX(55vw) translateY(-4vh) rotate(-4deg); }
+    100% { transform: translateX(120vw) translateY(-8vh) rotate(-4deg); }
+}
+@media (max-width: 900px) {
+    .fondation-scene .trantor { width: 46vw; right: -16vw; top: 4vh; opacity: 0.45; }
+    .fondation-scene .terminus { width: 32vw; left: -10vw; opacity: 0.45; }
+    .fondation-scene .synnax, .fondation-scene .strands { display: none; }
+    .fondation-scene .vaisseau { width: 34vw; opacity: 0.7; }
+}
 
 /* ----- Typographie : titres façon Encyclopédie Galactique ----- */
 .theme-fondation h1,
 .theme-fondation h2,
-.theme-fondation h3 {
-    font-family: var(--title-font);
-    color: var(--accent);
-    letter-spacing: 0.06em;
-    font-weight: 600;
-}
-.theme-fondation h1 { text-transform: uppercase; letter-spacing: 0.12em; text-shadow: var(--glow); }
-.theme-fondation h2 { font-size: 1.45rem; }
-.theme-fondation h2::before { content: "§ " / ""; color: var(--radiant); }
+.theme-fondation h3 { font-family: var(--title-font); color: var(--text); font-weight: 600; letter-spacing: 0.02em; }
+.theme-fondation h1 { letter-spacing: 0.06em; }
 .theme-fondation h2::after {
     content: "";
     display: block;
     width: 4rem;
-    height: 1px;
+    height: 2px;
     margin-top: 0.4rem;
-    background: linear-gradient(90deg, var(--accent), transparent);
+    background: linear-gradient(90deg, var(--gold), transparent);
 }
-
 .theme-fondation a { color: var(--radiant); text-underline-offset: 3px; }
 .theme-fondation a:hover { color: var(--accent); }
-.theme-fondation ::selection { background: var(--accent); color: var(--accent-text); }
 .theme-fondation .lead { color: var(--muted); }
-.theme-fondation .meta,
-.theme-fondation .breadcrumb { font-family: var(--hud-font); font-size: 0.85rem; letter-spacing: 0.04em; }
+.theme-fondation .breadcrumb::before { content: "Encyclopédie Galactique › " / ""; color: var(--accent); }
 
-/* ----- En-tête : sceau de la Fondation + statut du réseau chiral (Death Stranding) ----- */
+/* ----- En-tête ----- */
 .theme-fondation .site-header {
-    background: rgba(5, 9, 20, 0.92);
-    border-bottom: 1px solid rgba(232, 194, 106, 0.45);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
 }
 .theme-fondation .brand {
     font-family: var(--title-font);
-    color: var(--accent);
+    color: var(--text);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
@@ -93,103 +105,103 @@
 /* Sceau : soleil stylisé de la Fondation */
 .theme-fondation .brand::before {
     content: "";
-    width: 1.4rem;
-    height: 1.4rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 50%;
-    border: 1px solid var(--accent);
     background:
-        radial-gradient(circle, var(--accent) 0 22%, transparent 24%),
-        repeating-conic-gradient(var(--accent) 0 4deg, transparent 4deg 30deg);
+        radial-gradient(circle, var(--gold) 0 24%, transparent 26%),
+        repeating-conic-gradient(var(--gold) 0 5deg, transparent 5deg 30deg);
     -webkit-mask: radial-gradient(circle, #000 0 70%, transparent 71%);
     mask: radial-gradient(circle, #000 0 70%, transparent 71%);
 }
-.theme-fondation .brand::after {
-    content: "◉ RÉSEAU CHIRAL · CONNECTÉ" / "";
-    font-family: var(--hud-font);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--holo);
-    border: 1px solid rgba(168, 230, 255, 0.45);
-    border-radius: 999px;
-    padding: 0 0.6rem;
-    background: rgba(168, 230, 255, 0.06);
-    white-space: nowrap;
-}
-.theme-fondation .main-nav a { font-size: 0.9rem; letter-spacing: 0.05em; color: var(--text); }
-.theme-fondation .main-nav a:hover { color: var(--accent); }
-.theme-fondation .main-nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
+.theme-fondation .main-nav a { color: var(--text); }
+.theme-fondation .main-nav a:hover,
+.theme-fondation .main-nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--gold); }
+.theme-fondation .a11y { background: rgba(255, 255, 255, 0.7); }
 
-.theme-fondation .a11y { background: rgba(5, 9, 20, 0.92); border-bottom-color: var(--border); }
-
-/* ----- Accueil : transmission depuis Terminus, Radiant de Seldon ----- */
+/* ----- Accueil ----- */
 .theme-fondation .hero {
-    position: relative;
-    overflow: hidden;
     margin-top: 1.5rem;
-    padding: 3rem 2rem 2rem;
-    min-height: 320px;
-    border: 1px solid rgba(232, 194, 106, 0.5);
-    /* Coins holographiques façon interface de Death Stranding */
-    --corner: linear-gradient(var(--holo), var(--holo));
-    background:
-        var(--corner) top 6px left 6px / 18px 1px no-repeat,
-        var(--corner) top 6px left 6px / 1px 18px no-repeat,
-        var(--corner) top 6px right 6px / 18px 1px no-repeat,
-        var(--corner) top 6px right 6px / 1px 18px no-repeat,
-        var(--corner) bottom 6px left 6px / 18px 1px no-repeat,
-        var(--corner) bottom 6px left 6px / 1px 18px no-repeat,
-        var(--corner) bottom 6px right 6px / 18px 1px no-repeat,
-        var(--corner) bottom 6px right 6px / 1px 18px no-repeat,
-        linear-gradient(120deg, rgba(10, 18, 36, 0.92) 0%, rgba(10, 18, 36, 0.6) 100%);
-    box-shadow: 0 0 40px rgba(95, 212, 255, 0.08), inset 0 0 60px rgba(232, 194, 106, 0.05);
+    padding: 2.5rem 2rem 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 40px rgba(60, 50, 20, 0.08);
+    max-width: 720px;
 }
-.theme-fondation .hero > * { position: relative; z-index: 1; max-width: 60%; }
-.theme-fondation .hero::before {
-    content: "◉ RÉSEAU CHIRAL · TERMINUS ⟷ TRANTOR · PLAN SELDON" / "";
-    position: absolute;
-    top: 0.8rem;
-    left: 2rem;
-    font-family: var(--hud-font);
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    color: var(--holo);
-    opacity: 0.85;
+.theme-fondation .hero h1 { font-size: 2.6rem; margin: 0 0 0.25rem; }
+.theme-fondation .subtitle { color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.95rem; }
+
+/* ----- Le Radiant : plan des compétences en orbite ----- */
+.theme-fondation .plan { margin: 3rem 0; }
+.theme-fondation .radiant {
+    position: relative;
+    width: min(100%, 640px);
+    aspect-ratio: 1;
+    margin: 1rem auto;
 }
-/* Le Radiant : sphère d'équations aux anneaux concentriques */
-.theme-fondation .hero::after {
+/* Anneaux d'équations qui tournent lentement */
+.theme-fondation .radiant::before {
     content: "";
     position: absolute;
-    top: 50%;
-    right: 3%;
-    width: 340px;
-    height: 340px;
-    margin-top: -170px;
+    inset: 14%;
+    background: url("../../img/fondation/radiant-anneaux.svg") center / contain no-repeat;
+    animation: radiant-spin 120s linear infinite;
+}
+/* Cœur lumineux du Radiant */
+.theme-fondation .radiant::after {
+    content: "";
+    position: absolute;
+    inset: 38%;
     border-radius: 50%;
-    pointer-events: none;
-    background:
-        radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 2%, rgba(95, 212, 255, 0.8) 3%, rgba(95, 212, 255, 0.15) 12%, transparent 22%),
-        repeating-radial-gradient(circle, transparent 0 18px, rgba(95, 212, 255, 0.28) 19px 20px),
-        conic-gradient(from 0deg, transparent 0 8%, rgba(232, 194, 106, 0.55) 12%, transparent 16% 40%, rgba(95, 212, 255, 0.5) 46%, transparent 52% 72%, rgba(232, 194, 106, 0.4) 78%, transparent 84%);
-    -webkit-mask: radial-gradient(circle, #000 0 66%, transparent 71%);
-    mask: radial-gradient(circle, #000 0 66%, transparent 71%);
-    box-shadow: 0 0 60px rgba(95, 212, 255, 0.25);
-    animation: radiant-spin 60s linear infinite;
+    background: radial-gradient(circle, #ffffff 0 12%, #9fd8ff 30%, rgba(31, 99, 168, 0.35) 60%, transparent 72%);
+    box-shadow: 0 0 60px rgba(63, 160, 230, 0.45);
+    animation: radiant-pulse 6s ease-in-out infinite;
 }
-@keyframes radiant-spin {
-    to { transform: rotate(360deg); }
-}
-.theme-fondation .hero h1 { font-size: 2.8rem; margin: 0.6rem 0 0.2rem; }
-.theme-fondation .subtitle { font-family: var(--hud-font); color: var(--radiant); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.95rem; }
+@keyframes radiant-spin { to { transform: rotate(360deg); } }
+@keyframes radiant-pulse { 50% { transform: scale(1.08); box-shadow: 0 0 90px rgba(63, 160, 230, 0.6); } }
 
-@media (max-width: 480px) {
-    .theme-fondation .brand::after { content: "◉ CONNECTÉ" / ""; }
+.theme-fondation .radiant-nodes { position: absolute; inset: 0; margin: 0; display: block; }
+.theme-fondation .radiant-nodes li {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 168px;
+    margin: -48px 0 0 -84px;
+    z-index: 1;
+    /* 6 compétences réparties sur le cercle, de 60° en 60° en partant du haut */
+    transform: rotate(var(--angle)) translateY(-255px) rotate(calc(-1 * var(--angle)));
 }
+.theme-fondation .radiant-nodes li:nth-child(1) { --angle: 0deg; }
+.theme-fondation .radiant-nodes li:nth-child(2) { --angle: 60deg; }
+.theme-fondation .radiant-nodes li:nth-child(3) { --angle: 120deg; }
+.theme-fondation .radiant-nodes li:nth-child(4) { --angle: 180deg; }
+.theme-fondation .radiant-nodes li:nth-child(5) { --angle: 240deg; }
+.theme-fondation .radiant-nodes li:nth-child(6) { --angle: 300deg; }
+.theme-fondation .radiant-nodes a {
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(58, 143, 196, 0.45);
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(31, 99, 168, 0.12);
+    font-size: 0.85rem;
+    line-height: 1.3;
+    padding: 0.55rem 0.6rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.theme-fondation .radiant-nodes a:hover,
+.theme-fondation .radiant-nodes a:focus-visible { transform: scale(1.06); box-shadow: 0 6px 24px rgba(31, 99, 168, 0.28); border-color: var(--radiant); }
+.theme-fondation .node-count { font-size: 0.75rem; }
+
+/* Écran moyen ou petit : le Radiant devient une grille sous un cœur lumineux réduit */
 @media (max-width: 760px) {
-    .theme-fondation .hero { padding: 2.8rem 1.25rem 1.5rem; }
-    .theme-fondation .hero > * { max-width: 100%; }
-    .theme-fondation .hero::before { left: 1.25rem; right: 1rem; font-size: 0.65rem; }
-    .theme-fondation .hero::after { width: 220px; height: 220px; margin-top: -110px; right: -90px; opacity: 0.35; }
-    .theme-fondation .hero h1 { font-size: 2.1rem; }
+    .theme-fondation .radiant { width: 100%; aspect-ratio: auto; padding-top: 230px; }
+    .theme-fondation .radiant::before { inset: 0 auto auto 50%; width: 220px; height: 220px; margin-left: -110px; }
+    .theme-fondation .radiant::after { inset: 70px auto auto 50%; width: 80px; height: 80px; margin-left: -40px; }
+    .theme-fondation .radiant-nodes { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
+    .theme-fondation .radiant-nodes li { position: static; width: auto; margin: 0; transform: none; }
 }
 
 /* ----- Fiches de l'Encyclopédie Galactique ----- */
@@ -199,74 +211,50 @@
 .theme-fondation .login {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-top: 2px solid var(--accent);
-    backdrop-filter: blur(2px);
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    border-top: 3px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(60, 50, 20, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 .theme-fondation .card:hover,
-.theme-fondation .card:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 24px rgba(232, 194, 106, 0.15);
-    transform: translateY(-2px);
-}
-.theme-fondation .card h3::before { content: "✦ " / ""; color: var(--accent); }
-.theme-fondation .card h3 a { color: var(--text); text-decoration: none; }
-.theme-fondation .card h3 a:hover { color: var(--accent); text-decoration: underline; }
-.theme-fondation .competence { border-top: 1px solid var(--border); border-left: 3px solid var(--accent); }
-.theme-fondation .code { background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; font-family: var(--hud-font); }
-.theme-fondation .tags li { border-color: var(--radiant); color: var(--radiant); border-radius: 2px; font-family: var(--hud-font); font-size: 0.8rem; }
-.theme-fondation .related { border-left-color: var(--radiant); }
-.theme-fondation .breadcrumb::before { content: "ENCYCLOPÉDIE GALACTIQUE › " / ""; color: var(--accent); }
+.theme-fondation .card:focus-within { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(60, 50, 20, 0.12); }
+.theme-fondation .card h3::before { content: "✦ " / ""; color: var(--gold); }
+.theme-fondation .competence { scroll-margin-top: 1rem; }
+.theme-fondation .competence:target { box-shadow: 0 0 0 3px rgba(31, 99, 168, 0.35); }
+.theme-fondation .code { background: var(--radiant); color: #fff; border-radius: 4px; }
+.theme-fondation .tags li { border-color: var(--gold); color: var(--accent); background: rgba(255, 255, 255, 0.7); }
+.theme-fondation .related { border-left-color: var(--gold); }
 
 /* ----- Boutons ----- */
-.theme-fondation button,
-.theme-fondation .button {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 2px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-}
-.theme-fondation .button:not(.secondary) { background: var(--accent); color: var(--accent-text); }
-.theme-fondation button:hover,
-.theme-fondation .button:hover,
-.theme-fondation .a11y button[aria-pressed="true"] {
-    background: var(--accent);
-    color: var(--accent-text);
-    box-shadow: var(--glow);
-}
+.theme-fondation .button,
+.theme-fondation button { border-radius: 999px; padding: 0.55rem 1.3rem; }
+.theme-fondation .button { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.theme-fondation .button.secondary,
+.theme-fondation .a11y button,
+.theme-fondation .menu-toggle { background: rgba(255, 255, 255, 0.8); color: var(--accent); border-color: var(--gold); }
+.theme-fondation .a11y button[aria-pressed="true"] { background: var(--accent); color: #fff; }
 
-/* ----- Formulaires, tableaux, code ----- */
-.theme-fondation input,
-.theme-fondation textarea,
-.theme-fondation select { background: rgba(3, 6, 15, 0.7); border-color: var(--border); color: var(--text); }
-.theme-fondation input:focus,
-.theme-fondation textarea:focus { border-color: var(--accent); }
-.theme-fondation table { background: rgba(10, 18, 36, 0.85); }
-.theme-fondation th, .theme-fondation td { border-color: var(--border); }
-.theme-fondation thead th { color: var(--accent); background: rgba(232, 194, 106, 0.08); font-family: var(--title-font); }
+/* ----- Tableaux et pied de page ----- */
+.theme-fondation table { background: rgba(255, 255, 255, 0.9); }
+.theme-fondation thead th { background: #f1e7cf; font-family: var(--title-font); }
 .theme-fondation td.check { color: var(--radiant); }
-.theme-fondation pre { border-left: 3px solid var(--holo); font-family: var(--hud-font); }
-.theme-fondation code { font-family: var(--hud-font); color: var(--holo); }
-
-/* ----- Pied de page ----- */
-.theme-fondation .site-footer { border-top-color: rgba(232, 194, 106, 0.35); background: rgba(5, 9, 20, 0.92); }
-.theme-fondation .site-footer p { font-family: var(--hud-font); font-size: 0.8rem; letter-spacing: 0.05em; }
-.theme-fondation .site-footer p::before { content: "ENCYCLOPÉDIE GALACTIQUE · CONNECTÉ AU RÉSEAU CHIRAL · " / ""; color: var(--accent); }
+.theme-fondation .site-footer { background: rgba(255, 255, 255, 0.75); }
+.theme-fondation .site-footer p::before { content: "Encyclopédie Galactique · Plan Seldon · " / ""; color: var(--accent); }
 
 /* ----- Accessibilité et impression ----- */
-.a11y-contrast .theme-fondation .hero::after,
-.a11y-contrast .space-layer { display: none; }
-.a11y-contrast .theme-fondation h1 { text-shadow: none; }
-.a11y-motion .theme-fondation .hero::after { animation: none; }
-.a11y-motion .theme-fondation .card:hover { transform: none; }
+.a11y-contrast .fondation-scene { display: none; }
+.a11y-contrast .theme-fondation { background: #fff; }
+.a11y-motion .fondation-scene .vaisseau,
+.a11y-motion .theme-fondation .radiant::before,
+.a11y-motion .theme-fondation .radiant::after { animation: none; }
+.a11y-motion .fondation-scene .vaisseau { transform: translateX(60vw); }
 @media (prefers-reduced-motion: reduce) {
-    .theme-fondation .hero::after { animation: none; }
+    .fondation-scene .vaisseau,
+    .theme-fondation .radiant::before,
+    .theme-fondation .radiant::after { animation: none; }
+    .fondation-scene .vaisseau { transform: translateX(60vw); }
 }
 @media print {
-    .theme-fondation { background: #fff; --text: #000; --accent: #000; --surface: #fff; --border: #000; --radiant: #000; }
-    .space-layer, .theme-fondation .hero::after, .theme-fondation .hero::before { display: none; }
-    .theme-fondation h1 { text-shadow: none; }
+    .fondation-scene, .theme-fondation .radiant::before, .theme-fondation .radiant::after { display: none; }
+    .theme-fondation { background: #fff; }
 }

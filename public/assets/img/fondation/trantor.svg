@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" role="img" aria-label="Trantor">
+  <!-- Trantor, capitale de l'Empire : planète entièrement recouverte d'une ville de métal (illustration originale) -->
+  <defs>
+    <radialGradient id="tr-body" cx="38%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#fff4d6"/>
+      <stop offset="0.35" stop-color="#e2c27c"/>
+      <stop offset="0.75" stop-color="#9c7a3c"/>
+      <stop offset="1" stop-color="#4d3a1c"/>
+    </radialGradient>
+    <radialGradient id="tr-shade" cx="70%" cy="72%" r="65%">
+      <stop offset="0.45" stop-color="#1b1430" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1b1430" stop-opacity="0.45"/>
+    </radialGradient>
+    <pattern id="tr-city" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+      <rect width="14" height="14" fill="none"/>
+      <rect x="1" y="1" width="5" height="4" fill="#fff6dc" opacity="0.55"/>
+      <rect x="8" y="2" width="4" height="6" fill="#fff6dc" opacity="0.35"/>
+      <rect x="2" y="8" width="7" height="4" fill="#f3d48c" opacity="0.45"/>
+      <path d="M0 7H14M7 0V14" stroke="#7a5a26" stroke-width="0.6" opacity="0.6"/>
+    </pattern>
+    <clipPath id="tr-clip"><circle cx="200" cy="200" r="150"/></clipPath>
+    <filter id="tr-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+  </defs>
+  <circle cx="200" cy="200" r="158" fill="#ffe3a3" opacity="0.55" filter="url(#tr-glow)"/>
+  <circle cx="200" cy="200" r="150" fill="url(#tr-body)"/>
+  <g clip-path="url(#tr-clip)">
+    <rect x="40" y="40" width="320" height="320" fill="url(#tr-city)"/>
+    <g fill="none" stroke="#fff3cf" stroke-width="1.2" opacity="0.7">
+      <ellipse cx="200" cy="200" rx="150" ry="40"/>
+      <ellipse cx="200" cy="200" rx="150" ry="95"/>
+      <ellipse cx="200" cy="200" rx="45" ry="150"/>
+      <ellipse cx="200" cy="200" rx="105" ry="150"/>
+    </g>
+    <circle cx="200" cy="200" r="150" fill="url(#tr-shade)"/>
+  </g>
+  <!-- Anneau de stations orbitales -->
+  <g transform="rotate(-16 200 200)">
+    <ellipse cx="200" cy="200" rx="195" ry="38" fill="none" stroke="#b8862f" stroke-width="3" opacity="0.8"/>
+    <ellipse cx="200" cy="200" rx="185" ry="33" fill="none" stroke="#f5dc9b" stroke-width="1" opacity="0.8"/>
+    <g fill="#fff">
+      <rect x="18" y="196" width="10" height="5" rx="1"/>
+      <rect x="372" y="198" width="10" height="5" rx="1"/>
+      <rect x="196" y="234" width="12" height="5" rx="1"/>
+    </g>
+  </g>
+  <text x="200" y="425" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="8" fill="#7a5a1f">TRANTOR</text>
+</svg>

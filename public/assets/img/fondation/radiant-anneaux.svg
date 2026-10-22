@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Anneaux d'équations de psychohistoire du Radiant (touche Matrix : symboles qui défilent) -->
+  <defs>
+    <path id="ra-1" d="M250 250m-225 0a225 225 0 1 1 450 0a225 225 0 1 1-450 0"/>
+    <path id="ra-2" d="M250 250m-175 0a175 175 0 1 1 350 0a175 175 0 1 1-350 0"/>
+    <path id="ra-3" d="M250 250m-120 0a120 120 0 1 1 240 0a120 120 0 1 1-240 0"/>
+  </defs>
+  <g fill="none" stroke="#3a8fc4" stroke-opacity="0.35">
+    <circle cx="250" cy="250" r="238"/>
+    <circle cx="250" cy="250" r="188" stroke-dasharray="2 6"/>
+    <circle cx="250" cy="250" r="133"/>
+    <circle cx="250" cy="250" r="80" stroke-dasharray="1 4"/>
+  </g>
+  <g font-family="Georgia, serif" font-size="13" fill="#2a6fa8" fill-opacity="0.75" letter-spacing="2">
+    <text><textPath href="#ra-1">Σ ψ(t) = ∫ P(x,t) dx · Δ ≈ λ·N² · ∂Ψ/∂t = −∇·J · lim n→∞ σ/√n · Ω(T) = Σ pᵢ log pᵢ · Σ ψ(t) = ∫ P(x,t) dx · Δ ≈ λ·N²</textPath></text>
+  </g>
+  <g font-family="Georgia, serif" font-size="12" fill="#a8771c" fill-opacity="0.8" letter-spacing="2">
+    <text><textPath href="#ra-2">1 000 ans · PLAN SELDON · TERMINUS · TRANTOR · 1 000 ans · PLAN SELDON · TERMINUS · TRANTOR ·</textPath></text>
+  </g>
+  <g font-family="Georgia, serif" font-size="11" fill="#2a6fa8" fill-opacity="0.7" letter-spacing="1">
+    <text><textPath href="#ra-3">∂ρ/∂t + ∇·(ρv) = 0 · μ ± 2σ · e^{iπ}+1=0 · ∂ρ/∂t + ∇·(ρv) = 0 ·</textPath></text>
+  </g>
+</svg>

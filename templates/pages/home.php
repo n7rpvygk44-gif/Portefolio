@@ -8,6 +8,25 @@
     </p>
 </section>
 
+<section class="plan" aria-labelledby="plan-title">
+    <h2 id="plan-title">Le plan de mes compétences</h2>
+    <p class="lead">Les six compétences du référentiel BTS SIO, et le nombre de réalisations qui les mettent en œuvre.</p>
+    <div class="radiant">
+        <ul class="radiant-nodes">
+            <?php foreach ($competences as $c): ?>
+                <?php $n = count(array_filter($allRealisations, fn ($r) => in_array($c['code'], $r['competences'] ?? [], true))); ?>
+                <li>
+                    <a href="<?= e(url('/competences')) ?>#<?= e(competence_anchor($c['code'])) ?>">
+                        <span class="code"><?= e($c['code']) ?></span>
+                        <span class="node-title"><?= e($c['titre']) ?></span>
+                        <span class="node-count"><?= $n ?> réalisation<?= $n > 1 ? 's' : '' ?></span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</section>
+
 <?php if (!empty($profile['objectif'])): ?>
 <section>
     <h2>Mon objectif</h2>

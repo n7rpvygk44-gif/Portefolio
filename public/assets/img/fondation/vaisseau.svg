@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" role="img" aria-label="Vaisseau de Seldon">
+  <!-- Vaisseau de saut de Hari Seldon, vu de profil (illustration originale) -->
+  <defs>
+    <linearGradient id="vs-hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#d7dde8"/>
+      <stop offset="1" stop-color="#8a95ab"/>
+    </linearGradient>
+    <linearGradient id="vs-trail" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#7fd3ff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#7fd3ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="vs-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <!-- Traînée du réacteur -->
+  <path d="M0 62L120 54v16z" fill="url(#vs-trail)"/>
+  <circle cx="122" cy="62" r="9" fill="#bfeaff" filter="url(#vs-glow)"/>
+  <!-- Coque -->
+  <path d="M118 48h120c40 0 80 6 112 14-32 8-72 14-112 14H118c-6 0-10-6-10-14s4-14 10-14z" fill="url(#vs-hull)" stroke="#6b7690" stroke-width="1"/>
+  <!-- Aileron et nacelle -->
+  <path d="M150 48l30-26h36l-20 26z" fill="#c9d1df" stroke="#6b7690" stroke-width="1"/>
+  <path d="M150 76l30 22h36l-20-22z" fill="#aab4c7" stroke="#6b7690" stroke-width="1"/>
+  <!-- Liseré or impérial -->
+  <path d="M120 64h200" stroke="#c8962e" stroke-width="3"/>
+  <!-- Hublots -->
+  <g fill="#ffe7a3">
+    <rect x="236" y="54" width="8" height="4" rx="2"/>
+    <rect x="250" y="54" width="8" height="4" rx="2"/>
+    <rect x="264" y="54" width="8" height="4" rx="2"/>
+  </g>
+  <path d="M300 56c14 1 28 3 40 6-12 2-26 4-40 5z" fill="#4b6c9a" opacity="0.85"/>
+</svg>

@@ -169,6 +169,13 @@ td.check { text-align: center; color: var(--accent); font-weight: 700; }
 
 .site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; }
 
+/* ===== Plan des compétences (accueil) ===== */
+.radiant-nodes { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+.radiant-nodes a { display: flex; flex-direction: column; gap: 0.25rem; height: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--text); }
+.radiant-nodes a:hover { border-color: var(--accent); }
+.radiant-nodes .code { align-self: flex-start; }
+.node-count { color: var(--muted); font-size: 0.85rem; }
+
 /* ===== Impression (tableau de synthèse en PDF) ===== */
 @media print {
     .site-header, .a11y, .site-footer, .skip-link, .search { display: none; }
