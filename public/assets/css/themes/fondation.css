@@ -377,7 +377,7 @@
    ===================================================================== */
 
 /* 1. Introduction : le Radiant attend d'être activé, puis déploie ses sphères d'équations.
-      Durées alignées sur TIMELINE dans fondation.js (anneaux à 1,6 / 2,4 / 3,2 / 4 s, fin à 8 s). */
+      Durées fournies par fondation.js (variables CSS) : 12 s pour l'introduction complète, 3 s à chaque changement de page. */
 .radiant-intro {
     position: fixed;
     inset: 0;
@@ -387,7 +387,7 @@
     background: radial-gradient(circle at 50% 45%, #fffaf0 0%, #f6f2ea 45%, #e9e0cf 100%);
     perspective: 1000px;
 }
-.radiant-intro.active { animation: intro-out 0.9s ease-in 8s forwards; }
+.radiant-intro.active { animation: intro-out var(--out-dur, 0.9s) ease-in var(--out-at, 11.1s) forwards; }
 .radiant-intro .stage {
     position: relative;
     width: min(70vmin, 560px);
@@ -395,12 +395,16 @@
     transform-style: preserve-3d;
     transform: rotateY(-40deg) rotateX(18deg);
 }
-.radiant-intro.active .stage { animation: stage-turn 9s cubic-bezier(0.3, 0.6, 0.2, 1) forwards; }
+.radiant-intro.active .stage { animation: stage-turn var(--turn, 12s) cubic-bezier(0.3, 0.6, 0.2, 1) forwards; }
 .radiant-intro .ring { opacity: 0; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(0.05); }
-.radiant-intro.active .ring { animation: ring-open 2.4s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; animation-delay: var(--delay, 1.6s); }
+.radiant-intro.active .ring { animation: ring-open var(--ring-dur, 3.2s) cubic-bezier(0.2, 0.9, 0.2, 1) forwards; animation-delay: var(--delay, 2.4s); }
 /* En attente : le Radiant est éteint, il respire à peine */
 .radiant-intro .radiant-core { cursor: pointer; box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.5), 0 0 24px rgba(243, 192, 99, 0.25); animation: core-sleep 3s ease-in-out infinite; }
-.radiant-intro.active .radiant-core { animation: core-wake 1.6s ease-out forwards, core-pulse 5s ease-in-out 1.6s infinite; }
+.radiant-intro.active .radiant-core { animation: core-wake var(--wake, 2s) ease-out forwards, core-pulse 5s ease-in-out var(--wake, 2s) infinite; }
+/* Version courte, à chaque changement de page : pas d'écran d'attente, ni de titre animé */
+.radiant-intro.short .gate,
+.radiant-intro.short .skip { display: none; }
+.radiant-intro.short .title { animation: none; }
 .radiant-intro .title {
     position: absolute;
     left: 0;

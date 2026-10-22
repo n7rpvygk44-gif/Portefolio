@@ -292,22 +292,21 @@
         bell(2637, 1.1, 0.035, 3);
     }
 
-    // Bande-son de l'introduction du Radiant (durée totale en secondes, alignée sur le CSS du thème).
-    function intro(timeline) {
-        const tl = timeline || {};
-        click(0, 0.55);                                    // la clé s'insère
-        swell(0.1, (tl.wake || 1.4), 0.32);                // le Radiant s'éveille
-        glass(329.6, tl.wake || 1.4, 0.16, 4);            // il s'illumine
-        bell(1318.5, (tl.wake || 1.4) + 0.05, 0.05, 4);
+    // Bande-son de l'introduction du Radiant, calée sur les durées données par le thème.
+    function intro(tl, short) {
+        const scale = short ? 0.6 : 1;
+        click(0, 0.55 * scale);                                   // la clé s'insère
+        swell(0.1, tl.wake, 0.32 * scale);                        // le Radiant s'éveille
+        glass(329.6, tl.wake, 0.16 * scale, short ? 2 : 4.5);     // il s'illumine
+        bell(1318.5, tl.wake + 0.05, 0.05 * scale, short ? 2 : 4);
         const notes = [659.3, 987.8, 1318.5, 1661.2];
-        (tl.rings || [1.6, 2.4, 3.2, 4]).forEach((at, i) => {   // chaque anneau d'équations s'ouvre
-            whoosh(at - 0.3, 1.6, 250 + i * 200, 4200, 0.07);
-            glass(notes[i], at + 0.2, 0.12, 3.2);
+        tl.rings.forEach((at, i) => {                             // chaque anneau d'équations s'ouvre
+            whoosh(Math.max(0, at - 0.3), tl.ringDur * 0.7, 250 + i * 200, 4200, 0.07 * scale);
+            glass(notes[i], at + 0.2, 0.12 * scale, short ? 1.6 : 3.4);
         });
-        setTimeout(() => startAmbient(3), ((tl.rings || [1.6])[0]) * 1000);
-        const end = tl.end || 8;                          // l'interface se déploie
-        whoosh(end - 1.2, 1.6, 400, 6000, 0.09);
-        [1318.5, 1661.2, 1975.5, 2637].forEach((f, i) => bell(f, end - 0.6 + i * 0.09, 0.04, 2.5));
+        startAmbient(short ? 1.5 : 3);
+        whoosh(Math.max(0, tl.end - 1.2), 1.6, 400, 6000, 0.09 * scale);   // l'interface se déploie
+        [1318.5, 1661.2, 1975.5, 2637].forEach((f, i) => bell(f, tl.end - 0.4 + i * 0.09, 0.04 * scale, 2.5));
     }
 
     // ----- Activation -----
@@ -408,10 +407,25 @@
     // Interface pour le thème : l'introduction du Radiant démarre le son avec sa propre bande-son.
     window.portfolioSound = {
         isEnabled: () => enabled,
-        playIntro(timeline) {
+        playIntro(timeline, mode) {
+            if (mode === 'short') {
+                // Changement de page : le son ne joue que s'il est activé et que le navigateur
+                // l'autorise sans nouveau clic (sinon il reprendra au premier clic).
+                if (!enabled) {
+                    return;
+                }
+                setup();
+                ctx.resume().then(() => {
+                    if (ctx.state === 'running') {
+                        resumed = true;
+                        intro(timeline, true);
+                    }
+                }).catch(() => {});
+                return;
+            }
             setEnabled(true);
             resumed = true;
-            wake(() => intro(timeline));
+            wake(() => intro(timeline, false));
         },
         disable() {
             setEnabled(false);

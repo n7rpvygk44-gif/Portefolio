@@ -183,28 +183,29 @@
         pending.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top).forEach(reveal);
     }
 
-    // Introduction du Radiant : seulement à la première page de la visite.
+    // Introduction du Radiant : complète (12 s) à la première page de la visite,
+    // courte (3 s) à chaque changement de page.
     let seen = false;
     try {
         seen = sessionStorage.getItem('fondation-intro') === '1';
         sessionStorage.setItem('fondation-intro', '1');
     } catch (e) {
-        seen = true;
+        seen = false;
     }
-    if (seen) {
-        requestAnimationFrame(() => requestAnimationFrame(start));
-        return;
-    }
+    const FULL = { total: 12, wake: 2, rings: [2.4, 3.6, 4.8, 6], ringDur: 3.2, outDur: 0.9 };
+    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 0.6 };
+    const T = seen ? SHORT : FULL;
+    T.end = T.total - T.outDur;
 
-    // Le Radiant attend d'être activé : ce geste permet aussi au navigateur de jouer le son
-    // (rituel de démarrage, comme une clé qu'on insère). Durées alignées sur fondation.css.
-    const TIMELINE = { wake: 1.4, rings: [1.6, 2.4, 3.2, 4.0], end: 8 };
     const intro = document.createElement('div');
-    intro.className = 'radiant-intro';
+    intro.className = 'radiant-intro' + (seen ? ' short' : '');
+    [['--wake', T.wake], ['--ring-dur', T.ringDur], ['--turn', T.total], ['--out-at', T.end], ['--out-dur', T.outDur]].forEach(([name, value]) => {
+        intro.style.setProperty(name, value + 's');
+    });
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    stage.append(sphere('sphere', TIMELINE.rings), core());
+    stage.append(sphere('sphere', T.rings), core());
     // Les anneaux de l'introduction sont posés directement dans la scène.
     const introSphere = stage.firstChild;
     while (introSphere.firstChild) {
@@ -217,7 +218,8 @@
     const name = document.querySelector('.brand');
     title.textContent = name ? name.textContent.trim() : '';
     const sub = document.createElement('span');
-    sub.textContent = 'Plan Seldon · Portfolio';
+    const heading = document.querySelector('main h1');
+    sub.textContent = seen && heading ? heading.textContent.trim() : 'Plan Seldon · Portfolio';
     title.appendChild(sub);
 
     const gate = document.createElement('div');
@@ -241,7 +243,6 @@
     skip.textContent = 'Passer l\'introduction';
     intro.append(stage, title, gate, skip);
     document.body.appendChild(intro);
-    activate.focus({ preventScroll: true });
 
     let done = false;
     let running = false;
@@ -261,25 +262,39 @@
         running = true;
         intro.classList.add('active');
         if (window.portfolioSound) {
-            if (withSound) {
-                window.portfolioSound.playIntro(TIMELINE);
+            if (seen) {
+                window.portfolioSound.playIntro(T, 'short');
+            } else if (withSound) {
+                window.portfolioSound.playIntro(T, 'full');
             } else {
                 window.portfolioSound.disable();
             }
         }
-        skip.focus({ preventScroll: true });
+        if (!seen) {
+            skip.focus({ preventScroll: true });
+        }
         // Le déploiement de l'interface commence pendant que l'introduction s'efface.
-        setTimeout(start, (TIMELINE.end + 0.1) * 1000);
-        setTimeout(finish, (TIMELINE.end + 0.9) * 1000);
+        setTimeout(start, (T.end + 0.1) * 1000);
+        setTimeout(finish, T.total * 1000);
     }
     function onKey(event) {
         if (event.key === 'Escape') {
             finish();
         }
     }
-    activate.addEventListener('click', () => run(true));
-    silent.addEventListener('click', () => run(false));
-    stage.addEventListener('click', () => run(true));
-    skip.addEventListener('click', finish);
     document.addEventListener('keydown', onKey);
+    intro.addEventListener('click', () => {
+        if (seen) {
+            finish();
+        }
+    });
+    if (seen) {
+        run(false);
+    } else {
+        activate.focus({ preventScroll: true });
+        activate.addEventListener('click', () => run(true));
+        silent.addEventListener('click', () => run(false));
+        stage.addEventListener('click', () => run(true));
+        skip.addEventListener('click', finish);
+    }
 })();
