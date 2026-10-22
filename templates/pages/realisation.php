@@ -1,7 +1,7 @@
 <?php
 $titles = array_column($competences, 'titre', 'code');
 ?>
-<p class="breadcrumb"><a href="/realisations">Réalisations</a> › <?= e($item['titre']) ?></p>
+<p class="breadcrumb"><a href="<?= e(url('/realisations')) ?>">Réalisations</a> › <?= e($item['titre']) ?></p>
 
 <article>
     <h1><?= e($item['titre']) ?></h1>
@@ -38,7 +38,7 @@ $titles = array_column($competences, 'titre', 'code');
             <h2>Documentation associée</h2>
             <ul>
                 <?php foreach ($kb as $k): ?>
-                    <li><a href="/base-de-connaissances/<?= e($k['slug']) ?>"><?= e($k['titre']) ?></a></li>
+                    <li><a href="<?= e(url('/base-de-connaissances/' . $k['slug'])) ?>"><?= e($k['titre']) ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </aside>

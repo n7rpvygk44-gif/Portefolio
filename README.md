@@ -25,18 +25,33 @@ templates/                 gabarits HTML (pages publiques et backoffice)
 data/                      contenus en JSON (profil, réalisations, veille, base de connaissances)
 bin/create-admin.php       création du compte administrateur
 bin/router.php             routeur pour tester en local
+bin/build-static.php       génération de la version statique (dist/)
 ```
 
 ## Tester en local
 
 ```
-php bin/create-admin.php
 php -S localhost:8000 -t public bin/router.php
 ```
 
-Puis ouvrir http://localhost:8000 (et http://localhost:8000/admin pour le backoffice).
+Puis ouvrir http://localhost:8000. Pour tester le backoffice : passer `'admin_enabled'` à `true`, lancer `php bin/create-admin.php`, puis ouvrir http://localhost:8000/admin.
 
-## Mettre en ligne sur AlwaysData
+## Version statique (GitHub Pages) : mode actuel
+
+Pour l'instant le site est publié **sans PHP** sur GitHub Pages : https://n7rpvygk44-gif.github.io/Portefolio/
+
+- `php bin/build-static.php` génère toutes les pages en HTML dans `dist/` (avec `sitemap.xml` et `robots.txt`).
+- À chaque push sur `main`, le workflow `.github/workflows/pages.yml` relance cette génération et publie le résultat.
+- Le contenu se modifie dans les fichiers `data/*.json`, puis on pousse sur GitHub.
+- La recherche de la base de connaissances fonctionne en JavaScript.
+- Le **backoffice est désactivé** (`'admin_enabled' => false` dans `config.php`) : son code est conservé, mais `/admin` renvoie une page introuvable et il n'est pas inclus dans la version statique.
+
+Adresse et préfixe de la version statique : section `static` de `config.php`.
+
+## Mettre en ligne sur AlwaysData (plus tard, avec le backoffice)
+
+Passer `'admin_enabled'` à `true` dans `config.php`, puis :
+
 
 1. Créer un compte gratuit sur alwaysdata.com.
 2. **Web › Sites** : type PHP, racine du site = `www/public`.

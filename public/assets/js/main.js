@@ -98,5 +98,12 @@
                 empty.hidden = visible > 0;
             }
         });
+
+        // Version statique : la recherche arrive dans l'adresse (?q=...), on l'applique au chargement.
+        const q = new URLSearchParams(window.location.search).get('q');
+        if (q) {
+            filter.value = q;
+            filter.dispatchEvent(new Event('input'));
+        }
     }
 })();

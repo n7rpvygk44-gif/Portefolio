@@ -1,7 +1,7 @@
 <h1>Base de connaissances</h1>
 <p class="lead">Guides d'utilisation, documentations et procédures des outils présentés dans mes réalisations.</p>
 
-<form class="search" method="get" action="/base-de-connaissances" role="search">
+<form class="search" method="get" action="<?= e(url('/base-de-connaissances')) ?>" role="search">
     <label for="q">Rechercher une fiche</label>
     <input type="search" id="q" name="q" value="<?= e($q) ?>" placeholder="ex. VLAN, Active Directory, GLPI…" data-kb-filter>
     <button type="submit">Rechercher</button>

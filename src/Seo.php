@@ -7,7 +7,7 @@ final class Seo
 {
     public static function url(array $config, string $path): string
     {
-        return rtrim($config['base_url'], '/') . $path;
+        return rtrim($config['base_url'], '/') . page_path($path);
     }
 
     // Liste de toutes les pages publiques, utilisée pour le sitemap.
@@ -38,6 +38,7 @@ final class Seo
 
     public static function robots(array $config): string
     {
-        return "User-agent: *\nDisallow: /admin\nSitemap: " . self::url($config, '/sitemap.xml') . "\n";
+        $disallow = $config['admin_enabled'] ? url('/admin') : '';
+        return "User-agent: *\nDisallow: $disallow\nSitemap: " . self::url($config, '/sitemap.xml') . "\n";
     }
 }

@@ -6,6 +6,19 @@ return [
     'site_name' => 'Portfolio BTS SIO SISR',
     'lang' => 'fr',
 
+    // Préfixe des liens quand le site n'est pas à la racine du domaine (ex. '/Portefolio').
+    'base_path' => '',
+
+    // Backoffice : false le désactive complètement (/admin renvoie une page introuvable).
+    // Le code est conservé ; passer à true une fois le site hébergé avec PHP (AlwaysData).
+    'admin_enabled' => false,
+
+    // Réglages utilisés pour générer la version statique (bin/build-static.php, GitHub Pages).
+    'static' => [
+        'base_url' => 'https://n7rpvygk44-gif.github.io/Portefolio',
+        'base_path' => '/Portefolio',
+    ],
+
     // Dossier des données JSON (hors de public/, donc inaccessible depuis le web).
     'data_dir' => __DIR__ . '/data',
 

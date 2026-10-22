@@ -13,7 +13,7 @@
         <p class="meta">
             Réalisations :
             <?php if ($linked): ?>
-                <?= implode(', ', array_map(fn ($r) => '<a href="/realisations/' . e($r['slug']) . '">' . e($r['titre']) . '</a>', $linked)) ?>
+                <?= implode(', ', array_map(fn ($r) => '<a href="' . e(url('/realisations/' . $r['slug'])) . '">' . e($r['titre']) . '</a>', $linked)) ?>
             <?php else: ?>
                 à venir
             <?php endif; ?>

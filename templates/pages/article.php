@@ -1,4 +1,4 @@
-<p class="breadcrumb"><a href="<?= e($back[0]) ?>"><?= e($back[1]) ?></a> › <?= e($item['titre']) ?></p>
+<p class="breadcrumb"><a href="<?= e(url($back[0])) ?>"><?= e($back[1]) ?></a> › <?= e($item['titre']) ?></p>
 
 <article>
     <h1><?= e($item['titre']) ?></h1>

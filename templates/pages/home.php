@@ -3,8 +3,8 @@
     <p class="subtitle"><?= e($profile['titre'] ?? '') ?></p>
     <p class="lead"><?= e($profile['accroche'] ?? '') ?></p>
     <p class="actions">
-        <a class="button" href="/realisations">Voir mes réalisations</a>
-        <a class="button secondary" href="/contact">Me contacter</a>
+        <a class="button" href="<?= e(url('/realisations')) ?>">Voir mes réalisations</a>
+        <a class="button secondary" href="<?= e(url('/contact')) ?>">Me contacter</a>
     </p>
 </section>
 

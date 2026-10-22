@@ -28,7 +28,7 @@ function notFound(array $vars): void
 }
 
 // ----- Backoffice -----
-if ($path === '/admin' || str_starts_with($path, '/admin/')) {
+if ($config['admin_enabled'] && ($path === '/admin' || str_starts_with($path, '/admin/'))) {
     require ROOT_DIR . '/src/admin_routes.php';
     exit;
 }

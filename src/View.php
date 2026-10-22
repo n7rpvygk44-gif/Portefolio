@@ -9,6 +9,28 @@ function e(mixed $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+// Adresse d'une page ou d'un fichier du site, avec le préfixe base_path.
+// En version statique, les pages se terminent par "/" (chaque page est un dossier avec index.html).
+function url(string $path): string
+{
+    global $config;
+    return rtrim($config['base_path'], '/') . page_path($path);
+}
+
+function page_path(string $path): string
+{
+    global $config;
+    if (empty($config['static_build'])) {
+        return $path;
+    }
+    $parts = explode('?', $path, 2);
+    $last = basename($parts[0]);
+    if ($parts[0] !== '/' && !str_contains($last, '.')) {
+        $parts[0] = rtrim($parts[0], '/') . '/';
+    }
+    return implode('?', $parts);
+}
+
 final class View
 {
     // Affiche templates/<template>.php à l'intérieur du gabarit général (layout).

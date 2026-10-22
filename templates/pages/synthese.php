@@ -20,7 +20,7 @@
             <tbody>
                 <?php foreach ($realisations as $r): ?>
                     <tr>
-                        <th scope="row"><a href="/realisations/<?= e($r['slug']) ?>"><?= e($r['titre']) ?></a></th>
+                        <th scope="row"><a href="<?= e(url('/realisations/' . $r['slug'])) ?>"><?= e($r['titre']) ?></a></th>
                         <td><?= e($r['contexte'] ?? '') ?></td>
                         <td><?= e($r['date'] ?? '') ?></td>
                         <?php foreach ($competences as $c): ?>

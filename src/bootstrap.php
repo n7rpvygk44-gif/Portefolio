@@ -15,6 +15,14 @@ require ROOT_DIR . '/src/Theme.php';
 
 $config = require ROOT_DIR . '/config.php';
 
+// Génération de la version statique : on remplace l'adresse du site et on n'ouvre pas de session.
+$config['static_build'] = getenv('STATIC_BUILD') === '1';
+if ($config['static_build']) {
+    $config = array_merge($config, $config['static']);
+    $config['static_build'] = true;
+    $config['admin_enabled'] = false;
+}
+
 $store = new JsonStore($config['data_dir']);
 
 // En-têtes de sécurité envoyés sur toutes les pages.
@@ -34,7 +42,11 @@ session_set_cookie_params([
     'samesite' => 'Strict',
 ]);
 session_name('portfolio_session');
-session_start();
+if ($config['static_build']) {
+    $_SESSION = [];
+} else {
+    session_start();
+}
 
 $auth = new Auth($store, $config);
 $theme = Theme::current($store);
