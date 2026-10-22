@@ -1,15 +1,15 @@
-// Thème « Fondation » (clair) : ajoute le décor en arrière-plan.
-// Planètes Trantor, Terminus et Synnax, liens du réseau chiral entre elles (touche Death Stranding)
-// et vaisseau de Seldon qui traverse le ciel. Tout est décoratif (aria-hidden) ;
-// les animations sont gérées en CSS et s'arrêtent avec « Réduire les animations ».
+// Thème « Fondation » (moderne et technique) : ajoute le décor en arrière-plan.
+// Planètes Trantor, Terminus et Synnax avec repères de ciblage et étiquettes,
+// liens du réseau chiral entre elles (touche Death Stranding) et vaisseau de Seldon.
+// Tout est décoratif (aria-hidden) ; les animations sont en CSS et s'arrêtent
+// avec « Réduire les animations ».
 
 (function () {
     'use strict';
 
     // Dossier des images, retrouvé à partir de l'adresse de ce script
     // (fonctionne aussi quand le site est dans un sous-dossier, comme sur GitHub Pages).
-    const script = document.currentScript;
-    const imgDir = new URL('../../img/fondation/', script.src).href;
+    const imgDir = new URL('../../img/fondation/', document.currentScript.src).href;
 
     const scene = document.createElement('div');
     scene.className = 'fondation-scene';
@@ -21,7 +21,7 @@
     strands.setAttribute('class', 'strands');
     strands.setAttribute('viewBox', '0 0 100 100');
     strands.setAttribute('preserveAspectRatio', 'none');
-    const points = { trantor: [86, 30], synnax: [8, 31], terminus: [6, 86] };
+    const points = { trantor: [88, 32], synnax: [8, 31], terminus: [6, 82] };
     [['trantor', 'synnax'], ['synnax', 'terminus'], ['terminus', 'trantor']].forEach(([a, b]) => {
         const line = document.createElementNS(svgNS, 'line');
         line.setAttribute('x1', points[a][0]);
@@ -33,14 +33,34 @@
     });
     scene.appendChild(strands);
 
-    ['synnax', 'terminus', 'trantor', 'vaisseau'].forEach((name) => {
+    // Planètes : image recadrée (sans son nom dessiné) + étiquette façon interface.
+    const planets = [
+        { name: 'synnax', label: 'SYNNAX', info: 'OCÉAN' },
+        { name: 'terminus', label: 'TERMINUS', info: 'FONDATION' },
+        { name: 'trantor', label: 'TRANTOR', info: 'CAPITALE' },
+    ];
+    planets.forEach(({ name, label, info }) => {
+        const planet = document.createElement('div');
+        planet.className = 'planet ' + name;
+        const crop = document.createElement('div');
+        crop.className = 'planet-crop';
         const img = document.createElement('img');
         img.src = imgDir + name + '.svg';
         img.alt = '';
-        img.className = name;
         img.decoding = 'async';
-        scene.appendChild(img);
+        crop.appendChild(img);
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.innerHTML = label + ' · <b>' + info + '</b>';
+        planet.append(crop, tag);
+        scene.appendChild(planet);
     });
+
+    const ship = document.createElement('img');
+    ship.src = imgDir + 'vaisseau.svg';
+    ship.alt = '';
+    ship.className = 'vaisseau';
+    scene.appendChild(ship);
 
     document.body.prepend(scene);
 })();

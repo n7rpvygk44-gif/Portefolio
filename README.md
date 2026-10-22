@@ -80,7 +80,8 @@ Thèmes fournis :
 - `defaut` : sobre, clair ou sombre
 - `codec` : univers Metal Gear Solid (écran de codec, HUD) et Matrix (vert phosphore, pluie de caractères). La pluie se coupe avec « Réduire les animations » ou le contraste renforcé.
 - `seldon` : `codec` + univers de *Fondation* d'Asimov (ciel galactique, Radiant de Hari Seldon, Terminus, Encyclopédie Galactique, symboles de psychohistoire dans la pluie).
-- `fondation` (actif) : thème clair. Planètes de *Fondation* (Trantor, Terminus, Synnax), vaisseau de Seldon qui traverse le ciel, et le **Radiant** au centre de l'accueil : les 6 compétences en orbite autour de son cœur, avec un lien vers chacune. Touches *Death Stranding 2* (liens du réseau chiral entre les planètes) et *Matrix* (équations dans les anneaux du Radiant). Illustrations originales dans `public/assets/img/fondation/`.
+- `fondation` (actif) : thème clair, moderne et technique. Fond en grille de plan, panneaux en verre dépoli, étiquettes en police à chasse fixe, panneau de télémétrie dans l'accueil. Planètes de *Fondation* (Trantor, Terminus, Synnax) avec repères de ciblage, vaisseau de Seldon, et le **Radiant** façon HUD au centre de l'accueil : les 6 compétences en orbite autour de son cœur, avec un lien vers chacune. Touches *Death Stranding 2* (réseau chiral) et *Matrix* (équations dans les anneaux). Illustrations originales dans `public/assets/img/fondation/`.
+- `fondation-classique` : la version claire précédente (titres à empattements), conservée pour comparer.
 - `fondation-nuit` : l'ancienne version sombre (espace profond, pluie d'équations).
 
 En version statique, le thème actif se choisit dans `data/settings.json`.
