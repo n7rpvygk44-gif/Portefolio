@@ -1,0 +1,10 @@
+[
+    {
+        "titre": "Déployer le portfolio sur AlwaysData",
+        "slug": "deployer-portfolio-alwaysdata",
+        "categorie": "Procédure",
+        "outil": "AlwaysData",
+        "resume": "Mettre en ligne le site PHP sur l'offre gratuite d'AlwaysData, avec le dossier public/ comme racine.",
+        "contenu": "## Prérequis\n\n- Un compte AlwaysData (offre gratuite, 100 Mo)\n- Le code du portfolio sur GitHub\n\n## Étapes\n\n1. Dans l'administration AlwaysData, ouvrir **Web › Sites** et modifier le site par défaut.\n2. Choisir le type **PHP** et indiquer comme racine le dossier `public/` du projet.\n3. Se connecter en SSH (**Accès distant › SSH**), puis cloner le dépôt :\n\n```\ngit clone https://github.com/<compte>/portfolio.git www\n```\n\n4. Créer le compte administrateur :\n\n```\nphp www/bin/create-admin.php\n```\n\n5. Modifier `base_url` dans `config.php` avec l'adresse du site.\n\n## Vérification\n\n- La page d'accueil s'affiche en HTTPS\n- `/sitemap.xml` liste toutes les pages\n- `/admin` demande un identifiant"
+    }
+]

@@ -1,0 +1,13 @@
+[
+    {
+        "titre": "Conception et hébergement de mon portfolio",
+        "slug": "portfolio",
+        "contexte": "Formation",
+        "date": "2026-10-22",
+        "resume": "Création d'un site portfolio en PHP avec backoffice sécurisé, données en JSON, référencement et base de connaissances, hébergé sur AlwaysData.",
+        "competences": ["B1.3", "B1.4", "B1.5", "B1.6"],
+        "outils": ["PHP", "HTML", "CSS", "JavaScript", "JSON", "Git", "GitHub", "AlwaysData"],
+        "kb": ["deployer-portfolio-alwaysdata"],
+        "contenu": "## Contexte\n\nÀ compléter : pourquoi un portfolio, ce qui était demandé pour l'épreuve E5.\n\n## Objectifs\n\n- Présenter mon parcours et mes réalisations\n- Pouvoir mettre à jour le contenu sans toucher au code (backoffice)\n- Être bien référencé et accessible\n\n## Étapes\n\n1. Recherche de solutions (CMS, site statique, PHP)\n2. Choix de l'architecture et de l'hébergement\n3. Développement et tests en local\n4. Mise en ligne\n\n## Bilan\n\nÀ compléter : difficultés, solutions, ce que j'ai appris."
+    }
+]

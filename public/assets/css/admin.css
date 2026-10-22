@@ -1,0 +1,22 @@
+/* Styles propres au backoffice (en complément de style.css). */
+.admin .main-nav form { display: inline; }
+button.link { background: none; border: none; padding: 0.25rem 0; color: var(--text); text-decoration: underline; }
+button.link.danger { color: #b3261e; }
+
+.login { max-width: 420px; margin: 3rem auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem 1.5rem; }
+
+.alert { padding: 0.75rem 1rem; border-radius: var(--radius); }
+.alert.error { background: #fde8e7; color: #8c1d18; border: 1px solid #f2b8b5; }
+.alert.success { background: #e6f4ea; color: #1e5e33; border: 1px solid #a8d5b5; }
+
+.admin-form p { margin-bottom: 1.25rem; }
+.admin-form small { display: block; color: var(--muted); margin-top: 0.25rem; }
+textarea.markdown { font-family: ui-monospace, Consolas, monospace; font-size: 0.95rem; }
+
+.admin-table .actions { display: flex; gap: 1rem; align-items: center; }
+.admin-table .actions form { margin: 0; }
+
+.theme-choice { display: flex; align-items: center; gap: 0.75rem; }
+.theme-choice input { width: auto; }
+.theme-choice label { margin: 0; font-weight: 400; }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 1rem; }

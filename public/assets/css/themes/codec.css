@@ -1,0 +1,205 @@
+/* =====================================================================
+   Thème « Codec » : univers Metal Gear Solid (écran de codec, HUD, alertes)
+   mêlé à l'univers Matrix (vert phosphore, pluie de caractères, terminal).
+   Ce fichier ne fait que surcharger style.css : le supprimer rend le style de base.
+   ===================================================================== */
+
+.theme-codec {
+    --bg: #010805;
+    --surface: rgba(3, 20, 11, 0.88);
+    --text: #b8f5c8;
+    --muted: #6fbf88;
+    --border: #1f6b3a;
+    --accent: #39ff7a;
+    --accent-text: #00140a;
+    --code-bg: #04200f;
+    --focus: #ffb000;
+    --alert: #ff4d3a;
+    --glow: 0 0 6px rgba(57, 255, 122, 0.55);
+    --radius: 0;
+    --font: "Cascadia Mono", "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", "Courier New", monospace;
+    color-scheme: dark;
+}
+
+/* Réglages d'accessibilité : ils restent prioritaires sur le thème. */
+.a11y-readable .theme-codec { --font: Verdana, Tahoma, sans-serif; }
+.a11y-contrast .theme-codec { --text: #ffffff; --muted: #ffffff; --bg: #000; --surface: #000; --border: #39ff7a; --accent: #7dffa6; --glow: none; }
+.theme-codec [data-a11y="theme"] { display: none; } /* thème toujours sombre */
+
+/* ----- Fond : lignes de balayage d'écran CRT + vignette ----- */
+.theme-codec {
+    background:
+        radial-gradient(ellipse at center, rgba(0, 40, 18, 0.35) 0%, rgba(0, 0, 0, 0.85) 100%),
+        var(--bg);
+    background-attachment: fixed;
+}
+.theme-codec::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.18) 3px);
+}
+.a11y-contrast .theme-codec::after,
+.a11y-readable .theme-codec::after { display: none; }
+
+/* Pluie de caractères (créée par assets/js/themes/codec.js) */
+.matrix-rain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.22;
+}
+
+/* ----- Typographie ----- */
+.theme-codec h1,
+.theme-codec h2,
+.theme-codec h3 {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-shadow: var(--glow);
+    font-weight: 700;
+}
+.theme-codec h1::before { content: "> " / ""; color: var(--muted); }
+.theme-codec ::selection { background: var(--accent); color: var(--accent-text); }
+.theme-codec a { color: var(--accent); text-underline-offset: 3px; }
+.theme-codec a:hover { text-shadow: var(--glow); }
+
+/* ----- En-tête façon HUD ----- */
+.theme-codec .site-header {
+    background: rgba(0, 10, 4, 0.92);
+    border-bottom: 1px solid var(--accent);
+    box-shadow: 0 1px 12px rgba(57, 255, 122, 0.25);
+}
+.theme-codec .brand {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-shadow: var(--glow);
+}
+.theme-codec .brand::after {
+    content: "FREQ 140.85" / "";
+    margin-left: 0.75rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    vertical-align: middle;
+}
+.theme-codec .main-nav a { text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.08em; }
+.theme-codec .main-nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); text-shadow: var(--glow); }
+.theme-codec .main-nav a[aria-current="page"]::before { content: "▶ " / ""; }
+
+.theme-codec .a11y { background: rgba(0, 10, 4, 0.92); border-bottom-color: var(--border); }
+
+/* ----- Panneaux façon écran de codec (coins coupés) ----- */
+.theme-codec .card,
+.theme-codec .competence,
+.theme-codec .facts,
+.theme-codec .login {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.theme-codec .card:hover,
+.theme-codec .card:focus-within {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 18px rgba(57, 255, 122, 0.18);
+}
+.theme-codec .card h3::before { content: "◆ " / ""; color: var(--muted); }
+
+/* ----- Accueil : appel codec entrant ----- */
+.theme-codec .hero {
+    position: relative;
+    margin-top: 1rem;
+    padding: 2.5rem 1.5rem 1.5rem;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 24px rgba(57, 255, 122, 0.15), inset 0 0 40px rgba(57, 255, 122, 0.08);
+}
+.theme-codec .hero::before {
+    content: "// CODEC CALL : INCOMING" / "";
+    position: absolute;
+    top: 0.6rem;
+    left: 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--alert);
+    animation: codec-blink 1.2s steps(2, start) infinite;
+}
+.theme-codec .hero h1 { font-size: 2.4rem; margin: 0.5rem 0 0.25rem; }
+.theme-codec .hero h1::after {
+    content: "_" / "";
+    margin-left: 0.15em;
+    animation: codec-blink 1s steps(2, start) infinite;
+}
+.theme-codec .subtitle { color: var(--focus); letter-spacing: 0.1em; text-transform: uppercase; }
+
+@keyframes codec-blink {
+    to { visibility: hidden; }
+}
+
+/* ----- Boutons ----- */
+.theme-codec button,
+.theme-codec .button {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+}
+.theme-codec button:hover,
+.theme-codec .button:hover,
+.theme-codec .a11y button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-text);
+    box-shadow: var(--glow);
+}
+
+/* ----- Formulaires ----- */
+.theme-codec input,
+.theme-codec textarea,
+.theme-codec select {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--border);
+    color: var(--text);
+    caret-color: var(--accent);
+}
+.theme-codec input:focus,
+.theme-codec textarea:focus,
+.theme-codec select:focus { border-color: var(--accent); }
+
+/* ----- Étiquettes, tableaux, encadrés ----- */
+.theme-codec .code { background: var(--accent); color: var(--accent-text); border-radius: 0; }
+.theme-codec .tags li { border-color: var(--accent); border-radius: 0; color: var(--accent); }
+.theme-codec .related { border-left-color: var(--alert); }
+.theme-codec .related h2::before { content: "! " / ""; color: var(--alert); }
+.theme-codec table { background: rgba(0, 10, 4, 0.85); }
+.theme-codec th, .theme-codec td { border-color: var(--border); }
+.theme-codec thead th { background: rgba(57, 255, 122, 0.12); color: var(--accent); }
+.theme-codec pre { border-left: 3px solid var(--accent); }
+
+.theme-codec .site-footer { border-top-color: var(--border); background: rgba(0, 10, 4, 0.92); }
+.theme-codec .site-footer p::before { content: "[ CONNEXION SÉCURISÉE ] " / ""; color: var(--muted); }
+
+/* Animations coupées si l'utilisateur le demande */
+.a11y-motion .theme-codec .hero::before,
+.a11y-motion .theme-codec .hero h1::after { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+    .theme-codec .hero::before,
+    .theme-codec .hero h1::after { animation: none; }
+}
+
+@media print {
+    .theme-codec { background: #fff; --text: #000; --accent: #000; --surface: #fff; --border: #000; }
+    .theme-codec::after, .matrix-rain { display: none; }
+    .theme-codec h1, .theme-codec h2, .theme-codec h3 { text-shadow: none; }
+}

@@ -1,0 +1,102 @@
+// Scripts du site public : menu mobile, panneau d'accessibilité, filtre de la base de connaissances.
+
+(function () {
+    'use strict';
+
+    const root = document.documentElement;
+    const STORAGE_KEY = 'portfolio-a11y';
+
+    // Chaque option du panneau correspond à une classe CSS posée sur <html>.
+    const OPTIONS = {
+        theme: 'theme-dark',
+        large: 'a11y-large',
+        contrast: 'a11y-contrast',
+        readable: 'a11y-readable',
+        motion: 'a11y-motion',
+    };
+
+    function loadSettings() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveSettings(settings) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        } catch (e) {
+            // Stockage indisponible (navigation privée) : les réglages restent valables pour la page.
+        }
+    }
+
+    function applySettings(settings) {
+        Object.entries(OPTIONS).forEach(([key, className]) => {
+            root.classList.toggle(className, Boolean(settings[key]));
+            const button = document.querySelector('[data-a11y="' + key + '"]');
+            if (button) {
+                button.setAttribute('aria-pressed', settings[key] ? 'true' : 'false');
+            }
+        });
+        // Si l'utilisateur a désactivé le mode sombre explicitement, on force le clair.
+        root.classList.toggle('theme-light', settings.theme === false);
+    }
+
+    let settings = loadSettings();
+    applySettings(settings);
+
+    document.querySelectorAll('[data-a11y]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const key = button.dataset.a11y;
+            settings[key] = !settings[key];
+            applySettings(settings);
+            saveSettings(settings);
+        });
+    });
+
+    const reset = document.querySelector('[data-a11y-reset]');
+    if (reset) {
+        reset.addEventListener('click', () => {
+            settings = {};
+            applySettings(settings);
+            saveSettings(settings);
+        });
+    }
+
+    // Menu mobile
+    const toggle = document.querySelector('.menu-toggle');
+    const menu = document.getElementById('menu');
+    if (toggle && menu) {
+        toggle.addEventListener('click', () => {
+            const open = menu.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+
+    // Base de connaissances : filtre instantané pendant la saisie
+    // (le formulaire fonctionne aussi sans JavaScript grâce à la recherche côté serveur).
+    const filter = document.querySelector('[data-kb-filter]');
+    if (filter) {
+        const empty = document.querySelector('[data-kb-empty]');
+        filter.addEventListener('input', () => {
+            const q = filter.value.trim().toLowerCase();
+            let visible = 0;
+            document.querySelectorAll('[data-kb-section]').forEach((section) => {
+                let inSection = 0;
+                section.querySelectorAll('.card').forEach((card) => {
+                    const match = card.textContent.toLowerCase().includes(q);
+                    card.hidden = !match;
+                    if (match) {
+                        inSection++;
+                    }
+                });
+                section.hidden = inSection === 0;
+                visible += inSection;
+            });
+            if (empty) {
+                empty.hidden = visible > 0;
+            }
+        });
+    }
+})();

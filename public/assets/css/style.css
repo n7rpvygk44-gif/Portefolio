@@ -1,0 +1,181 @@
+/* ===== Couleurs et tailles (variables) ===== */
+:root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --text: #1d2330;
+    --muted: #5a6475;
+    --border: #d9dee7;
+    --accent: #0b5cad;
+    --accent-text: #ffffff;
+    --code-bg: #eef1f6;
+    --focus: #e8a400;
+    --radius: 8px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-size: 1rem;
+    --line-height: 1.6;
+    --letter-spacing: normal;
+    color-scheme: light;
+}
+
+/* Mode sombre : choisi dans le panneau, ou selon le système si rien n'est choisi. */
+@media (prefers-color-scheme: dark) {
+    :root:not(.theme-light) {
+        --bg: #12161d;
+        --surface: #1b212b;
+        --text: #e6e9ef;
+        --muted: #a3acbb;
+        --border: #313a48;
+        --accent: #6fb1ff;
+        --accent-text: #0b1220;
+        --code-bg: #232b37;
+        color-scheme: dark;
+    }
+}
+:root.theme-dark {
+    --bg: #12161d;
+    --surface: #1b212b;
+    --text: #e6e9ef;
+    --muted: #a3acbb;
+    --border: #313a48;
+    --accent: #6fb1ff;
+    --accent-text: #0b1220;
+    --code-bg: #232b37;
+    color-scheme: dark;
+}
+
+/* Réglages du panneau d'accessibilité */
+:root.a11y-large { --font-size: 1.2rem; }
+:root.a11y-contrast { --text: #000; --muted: #000; --bg: #fff; --surface: #fff; --border: #000; --accent: #0000c8; }
+:root.a11y-contrast.theme-dark { --text: #fff; --muted: #fff; --bg: #000; --surface: #000; --border: #fff; --accent: #ffff00; --accent-text: #000; }
+:root.a11y-readable { --font: Verdana, Tahoma, sans-serif; --line-height: 1.9; --letter-spacing: 0.05em; }
+:root.a11y-readable p, :root.a11y-readable li { max-width: 65ch; }
+:root.a11y-motion *, :root.a11y-motion *::before, :root.a11y-motion *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+html { font-size: var(--font-size); }
+body {
+    margin: 0;
+    font-family: var(--font);
+    line-height: var(--line-height);
+    letter-spacing: var(--letter-spacing);
+    color: var(--text);
+    background: var(--bg);
+}
+a { color: var(--accent); }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+img { max-width: 100%; height: auto; }
+h1, h2, h3 { line-height: 1.25; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.92em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: var(--radius); overflow-x: auto; }
+pre code { padding: 0; background: none; }
+
+.container { max-width: 1040px; margin: 0 auto; padding: 0 1rem; }
+main { padding-top: 1.5rem; padding-bottom: 3rem; min-height: 60vh; }
+main:focus { outline: none; }
+
+.skip-link { position: absolute; left: -9999px; top: 0; background: var(--accent); color: var(--accent-text); padding: 0.5rem 1rem; z-index: 10; }
+.skip-link:focus { left: 1rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ===== En-tête et menu ===== */
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); }
+.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; min-height: 3.5rem; }
+.brand { font-weight: 700; color: var(--text); text-decoration: none; }
+.main-nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; }
+.main-nav a { color: var(--text); text-decoration: none; padding: 0.25rem 0; display: inline-block; }
+.main-nav a[aria-current="page"] { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.menu-toggle { display: none; }
+
+@media (max-width: 760px) {
+    .menu-toggle { display: inline-block; }
+    .main-nav { width: 100%; display: none; padding-bottom: 0.75rem; }
+    .main-nav.open { display: block; }
+    .main-nav ul { flex-direction: column; }
+}
+
+/* ===== Panneau d'accessibilité ===== */
+.a11y { background: var(--surface); border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.a11y summary { cursor: pointer; padding: 0.4rem 0; color: var(--muted); }
+.a11y-options { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.75rem; }
+
+/* ===== Boutons et formulaires ===== */
+button, .button {
+    font: inherit;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-text);
+    text-decoration: none;
+}
+.button.secondary, .a11y button, .menu-toggle { background: transparent; color: var(--accent); }
+.a11y button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+input, textarea, select {
+    font: inherit;
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+}
+label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+
+/* ===== Contenus ===== */
+.hero { padding: 2rem 0 1rem; }
+.hero h1 { font-size: 2.2rem; margin-bottom: 0.25rem; }
+.subtitle { color: var(--accent); font-weight: 600; margin-top: 0; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+.empty { color: var(--muted); font-style: italic; }
+.breadcrumb { font-size: 0.9rem; color: var(--muted); }
+
+.cards { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.card h3, .card h2 { margin-top: 0; font-size: 1.1rem; }
+
+.competence { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 1.25rem; margin-bottom: 1rem; }
+.competence h2 { font-size: 1.15rem; }
+.code { display: inline-block; background: var(--accent); color: var(--accent-text); border-radius: 4px; padding: 0 0.4em; font-size: 0.85em; font-weight: 700; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0 1.25rem; }
+.facts h2 { font-size: 1rem; }
+.tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tags li { border: 1px solid var(--border); border-radius: 999px; padding: 0 0.6rem; font-size: 0.9rem; }
+.related { border-left: 4px solid var(--accent); padding-left: 1rem; margin-top: 2rem; }
+
+.search { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: end; margin: 1.5rem 0; }
+.search label { grid-column: 1 / -1; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); }
+th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; vertical-align: top; }
+caption { text-align: left; font-weight: 600; padding: 0.5rem 0; }
+td.check { text-align: center; color: var(--accent); font-weight: 700; }
+.legend { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; }
+.legend dt { font-weight: 700; }
+.legend dd { margin: 0; }
+
+.contact-list { list-style: none; padding: 0; font-size: 1.1rem; }
+.contact-list li { margin-bottom: 0.5rem; }
+
+.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; }
+
+/* ===== Impression (tableau de synthèse en PDF) ===== */
+@media print {
+    .site-header, .a11y, .site-footer, .skip-link, .search { display: none; }
+    body { background: #fff; color: #000; }
+    a { color: #000; text-decoration: none; }
+}
+
+/* Bandeau affiché pendant l'aperçu d'un thème (administrateur uniquement) */
+.preview-banner { margin: 0; padding: 0.4rem 1rem; text-align: center; background: #e8a400; color: #000; font-size: 0.9rem; }
+.preview-banner a { color: #000; }

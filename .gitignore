@@ -1,0 +1,4 @@
+# Compte administrateur et tentatives de connexion : jamais dans Git.
+data/admin.json
+data/login_attempts.json
+data/*.tmp

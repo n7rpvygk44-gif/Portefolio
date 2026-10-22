@@ -1,0 +1,10 @@
+# Toutes les adresses qui ne correspondent pas à un vrai fichier (CSS, JS, images)
+# sont envoyées à index.php : cela donne des URL propres, utiles au référencement.
+Options -Indexes
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+# Forcer le HTTPS (à décommenter une fois le certificat actif).
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
