@@ -1,9 +1,9 @@
-# Génère la version statique du site et la publie sur GitHub Pages à chaque push sur main.
+# Génère la version statique du site et la publie sur GitHub Pages.
+# Publication à la main : onglet Actions › « Publier sur GitHub Pages » › Run workflow.
+# Un push sur GitHub ne publie rien tout seul.
 name: Publier sur GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

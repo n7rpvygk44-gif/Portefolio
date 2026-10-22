@@ -41,8 +41,8 @@ Puis ouvrir http://localhost:8000. Pour tester le backoffice : passer `'admin_en
 Pour l'instant le site est publié **sans PHP** sur GitHub Pages : https://n7rpvygk44-gif.github.io/Portefolio/
 
 - `php bin/build-static.php` génère toutes les pages en HTML dans `dist/` (avec `sitemap.xml` et `robots.txt`).
-- À chaque push sur `main`, le workflow `.github/workflows/pages.yml` relance cette génération et publie le résultat.
-- Le contenu se modifie dans les fichiers `data/*.json`, puis on pousse sur GitHub.
+- La publication se lance **à la main** : sur GitHub, onglet **Actions › Publier sur GitHub Pages › Run workflow** (workflow `.github/workflows/pages.yml`). Un push seul ne change pas le site en ligne.
+- Le contenu se modifie dans les fichiers `data/*.json`, puis on pousse sur GitHub et on publie quand c'est prêt.
 - La recherche de la base de connaissances fonctionne en JavaScript.
 - Le **backoffice est désactivé** (`'admin_enabled' => false` dans `config.php`) : son code est conservé, mais `/admin` renvoie une page introuvable et il n'est pas inclus dans la version statique.
 
