@@ -1,8 +1,9 @@
 /* =====================================================================
    Thème « Fondation » : univers de Fondation d'Asimov en dominante
    (Empire galactique, or de Trantor, Radiant de Hari Seldon, Terminus,
-   Encyclopédie Galactique), avec des touches de Metal Gear Solid (fréquence
-   codec, HUD) et de Matrix (pluie d'équations de psychohistoire).
+   Encyclopédie Galactique), avec des touches de Death Stranding 2 de Hideo Kojima
+   (réseau chiral, liens entre les étoiles, interface holographique) et de Matrix
+   (pluie d'équations de psychohistoire).
    Ce fichier ne fait que surcharger style.css : le supprimer rend le style de base.
    ===================================================================== */
 
@@ -17,7 +18,7 @@
     --code-bg: #0e1830;
     --focus: #5fd4ff;
     --radiant: #5fd4ff;      /* lueur du Radiant de Seldon */
-    --codec: #39ff7a;        /* touche Metal Gear / Matrix */
+    --holo: #a8e6ff;         /* interface holographique de Death Stranding */
     --alert: #ff6b57;
     --glow: 0 0 10px rgba(232, 194, 106, 0.35);
     --radius: 2px;
@@ -67,6 +68,7 @@
     margin-top: 0.4rem;
     background: linear-gradient(90deg, var(--accent), transparent);
 }
+
 .theme-fondation a { color: var(--radiant); text-underline-offset: 3px; }
 .theme-fondation a:hover { color: var(--accent); }
 .theme-fondation ::selection { background: var(--accent); color: var(--accent-text); }
@@ -74,7 +76,7 @@
 .theme-fondation .meta,
 .theme-fondation .breadcrumb { font-family: var(--hud-font); font-size: 0.85rem; letter-spacing: 0.04em; }
 
-/* ----- En-tête : sceau de la Fondation + fréquence codec en touche ----- */
+/* ----- En-tête : sceau de la Fondation + statut du réseau chiral (Death Stranding) ----- */
 .theme-fondation .site-header {
     background: rgba(5, 9, 20, 0.92);
     border-bottom: 1px solid rgba(232, 194, 106, 0.45);
@@ -102,13 +104,16 @@
     mask: radial-gradient(circle, #000 0 70%, transparent 71%);
 }
 .theme-fondation .brand::after {
-    content: "TERMINUS · FREQ 140.85" / "";
+    content: "◉ RÉSEAU CHIRAL · CONNECTÉ" / "";
     font-family: var(--hud-font);
     font-size: 0.7rem;
     letter-spacing: 0.1em;
-    color: var(--codec);
-    border: 1px solid rgba(57, 255, 122, 0.5);
-    padding: 0 0.4rem;
+    color: var(--holo);
+    border: 1px solid rgba(168, 230, 255, 0.45);
+    border-radius: 999px;
+    padding: 0 0.6rem;
+    background: rgba(168, 230, 255, 0.06);
+    white-space: nowrap;
 }
 .theme-fondation .main-nav a { font-size: 0.9rem; letter-spacing: 0.05em; color: var(--text); }
 .theme-fondation .main-nav a:hover { color: var(--accent); }
@@ -124,19 +129,30 @@
     padding: 3rem 2rem 2rem;
     min-height: 320px;
     border: 1px solid rgba(232, 194, 106, 0.5);
-    background: linear-gradient(120deg, rgba(10, 18, 36, 0.92) 0%, rgba(10, 18, 36, 0.6) 100%);
+    /* Coins holographiques façon interface de Death Stranding */
+    --corner: linear-gradient(var(--holo), var(--holo));
+    background:
+        var(--corner) top 6px left 6px / 18px 1px no-repeat,
+        var(--corner) top 6px left 6px / 1px 18px no-repeat,
+        var(--corner) top 6px right 6px / 18px 1px no-repeat,
+        var(--corner) top 6px right 6px / 1px 18px no-repeat,
+        var(--corner) bottom 6px left 6px / 18px 1px no-repeat,
+        var(--corner) bottom 6px left 6px / 1px 18px no-repeat,
+        var(--corner) bottom 6px right 6px / 18px 1px no-repeat,
+        var(--corner) bottom 6px right 6px / 1px 18px no-repeat,
+        linear-gradient(120deg, rgba(10, 18, 36, 0.92) 0%, rgba(10, 18, 36, 0.6) 100%);
     box-shadow: 0 0 40px rgba(95, 212, 255, 0.08), inset 0 0 60px rgba(232, 194, 106, 0.05);
 }
 .theme-fondation .hero > * { position: relative; z-index: 1; max-width: 60%; }
 .theme-fondation .hero::before {
-    content: "// TRANSMISSION CODEC · TERMINUS → TRANTOR · PLAN SELDON" / "";
+    content: "◉ RÉSEAU CHIRAL · TERMINUS ⟷ TRANTOR · PLAN SELDON" / "";
     position: absolute;
     top: 0.8rem;
     left: 2rem;
     font-family: var(--hud-font);
     font-size: 0.72rem;
     letter-spacing: 0.15em;
-    color: var(--codec);
+    color: var(--holo);
     opacity: 0.85;
 }
 /* Le Radiant : sphère d'équations aux anneaux concentriques */
@@ -165,6 +181,9 @@
 .theme-fondation .hero h1 { font-size: 2.8rem; margin: 0.6rem 0 0.2rem; }
 .theme-fondation .subtitle { font-family: var(--hud-font); color: var(--radiant); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.95rem; }
 
+@media (max-width: 480px) {
+    .theme-fondation .brand::after { content: "◉ CONNECTÉ" / ""; }
+}
 @media (max-width: 760px) {
     .theme-fondation .hero { padding: 2.8rem 1.25rem 1.5rem; }
     .theme-fondation .hero > * { max-width: 100%; }
@@ -229,13 +248,13 @@
 .theme-fondation th, .theme-fondation td { border-color: var(--border); }
 .theme-fondation thead th { color: var(--accent); background: rgba(232, 194, 106, 0.08); font-family: var(--title-font); }
 .theme-fondation td.check { color: var(--radiant); }
-.theme-fondation pre { border-left: 3px solid var(--codec); font-family: var(--hud-font); }
-.theme-fondation code { font-family: var(--hud-font); color: var(--codec); }
+.theme-fondation pre { border-left: 3px solid var(--holo); font-family: var(--hud-font); }
+.theme-fondation code { font-family: var(--hud-font); color: var(--holo); }
 
 /* ----- Pied de page ----- */
 .theme-fondation .site-footer { border-top-color: rgba(232, 194, 106, 0.35); background: rgba(5, 9, 20, 0.92); }
 .theme-fondation .site-footer p { font-family: var(--hud-font); font-size: 0.8rem; letter-spacing: 0.05em; }
-.theme-fondation .site-footer p::before { content: "ENCYCLOPÉDIE GALACTIQUE · ÈRE DE LA FONDATION · " / ""; color: var(--accent); }
+.theme-fondation .site-footer p::before { content: "ENCYCLOPÉDIE GALACTIQUE · CONNECTÉ AU RÉSEAU CHIRAL · " / ""; color: var(--accent); }
 
 /* ----- Accessibilité et impression ----- */
 .a11y-contrast .theme-fondation .hero::after,
