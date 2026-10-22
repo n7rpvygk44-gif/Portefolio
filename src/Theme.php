@@ -14,7 +14,8 @@ final class Theme
         'defaut' => 'Sobre (par défaut)',
         'codec' => 'Codec : Metal Gear Solid × Matrix',
         'seldon' => 'Seldon : Metal Gear Solid × Matrix × Fondation',
-        'fondation' => 'Fondation : clair, moderne et technique (planètes, vaisseau, Radiant HUD)',
+        'fondation' => 'Fondation : inspiré de la série, clair (Trantor, cinématique du Radiant)',
+        'fondation-technique' => 'Fondation technique : clair, HUD, grille de plan (planètes, vaisseau)',
         'fondation-classique' => 'Fondation classique : clair, titres à empattements',
         'fondation-nuit' => 'Fondation (nuit) : espace profond, touches Death Stranding 2 et Matrix',
     ];
