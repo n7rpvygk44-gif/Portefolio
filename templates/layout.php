@@ -62,7 +62,7 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
 
 <footer class="site-footer">
     <div class="container">
-        <p>© <?= date('Y') ?> <?= e($siteName) ?> · Portfolio BTS SIO option SISR</p>
+        <p>© <?= date('Y') ?> <?= e($siteName) ?> · Portfolio BTS SIO option SISR · <a href="<?= e(url('/mentions-legales')) ?>">Mentions légales</a></p>
     </div>
 </footer>
 </body>

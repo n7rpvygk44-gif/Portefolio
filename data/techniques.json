@@ -1,0 +1,42 @@
+[
+    {
+        "domaine": "Systèmes",
+        "items": [
+            { "nom": "Windows Server (Active Directory, GPO)", "niveau": "" },
+            { "nom": "Linux (Debian, Ubuntu Server)", "niveau": "" }
+        ]
+    },
+    {
+        "domaine": "Réseaux",
+        "items": [
+            { "nom": "Adressage IP, VLAN, routage", "niveau": "" },
+            { "nom": "Services réseau (DNS, DHCP)", "niveau": "" }
+        ]
+    },
+    {
+        "domaine": "Virtualisation",
+        "items": [
+            { "nom": "Proxmox, VMware, VirtualBox", "niveau": "" }
+        ]
+    },
+    {
+        "domaine": "Sécurité",
+        "items": [
+            { "nom": "Pare-feu, sauvegardes, droits d'accès", "niveau": "" }
+        ]
+    },
+    {
+        "domaine": "Support et gestion de parc",
+        "items": [
+            { "nom": "GLPI (inventaire, tickets)", "niveau": "" }
+        ]
+    },
+    {
+        "domaine": "Web et outils",
+        "items": [
+            { "nom": "Git et GitHub", "niveau": "" },
+            { "nom": "HTML, CSS, JavaScript, PHP", "niveau": "" },
+            { "nom": "Python", "niveau": "" }
+        ]
+    }
+]

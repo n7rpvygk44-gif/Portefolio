@@ -63,8 +63,9 @@ switch (true) {
         break;
 
     case $path === '/competences':
-        View::render('pages/competences', $page('Compétences', 'Compétences du référentiel BTS SIO SISR et réalisations associées.') + [
+        View::render('pages/competences', $page('Compétences', 'Compétences du référentiel BTS SIO SISR, compétences techniques et réalisations associées.') + [
             'competences' => $store->read('competences'),
+            'techniques' => $store->read('techniques'),
             'realisations' => $store->read('realisations'),
         ]);
         break;
@@ -143,6 +144,10 @@ switch (true) {
 
     case $path === '/contact':
         View::render('pages/contact', $page('Contact', "Contacter $name."));
+        break;
+
+    case $path === '/mentions-legales':
+        View::render('pages/mentions-legales', $page('Mentions légales', "Mentions légales et données personnelles du portfolio de $name."));
         break;
 
     default:

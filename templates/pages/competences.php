@@ -20,3 +20,23 @@
         </p>
     </section>
 <?php endforeach; ?>
+
+<h2 id="techniques">Compétences techniques</h2>
+<p class="lead">Les technologies de l'option SISR que je travaille, avec mon niveau actuel. Ce tableau évolue au fil de la formation.</p>
+<?php if (!$techniques): ?>
+    <p class="empty">Les compétences techniques seront bientôt ajoutées.</p>
+<?php else: ?>
+    <div class="cards techniques">
+        <?php foreach ($techniques as $domaine): ?>
+            <section class="card">
+                <h3><?= e($domaine['domaine']) ?></h3>
+                <ul class="skill-list">
+                    <?php foreach ($domaine['items'] as $item): ?>
+                        <li><span><?= e($item['nom']) ?></span> <span class="meta"><?= e(($item['niveau'] ?? '') !== '' ? $item['niveau'] : 'niveau à évaluer') ?></span></li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
+        <?php endforeach; ?>
+    </div>
+    <p class="meta">Niveaux : notions, en cours d'acquisition, autonome, maîtrise.</p>
+<?php endif; ?>

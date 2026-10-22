@@ -186,3 +186,10 @@ td.check { text-align: center; color: var(--accent); font-weight: 700; }
 /* Bandeau affiché pendant l'aperçu d'un thème (administrateur uniquement) */
 .preview-banner { margin: 0; padding: 0.4rem 1rem; text-align: center; background: #e8a400; color: #000; font-size: 0.9rem; }
 .preview-banner a { color: #000; }
+
+/* ===== Compétences techniques ===== */
+.skill-list { list-style: none; padding: 0; margin: 0; }
+.skill-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+.skill-list li:last-child { border-bottom: none; }
+.skill-list .meta { white-space: nowrap; }
+.portrait { float: right; width: 160px; height: 160px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border); margin: 0 0 1rem 1rem; }
