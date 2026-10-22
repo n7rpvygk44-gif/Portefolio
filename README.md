@@ -79,6 +79,7 @@ Un thème est un fichier `public/assets/css/themes/<nom>.css` qui surcharge `sty
 Thèmes fournis :
 - `defaut` : sobre, clair ou sombre
 - `codec` : univers Metal Gear Solid (écran de codec, HUD) et Matrix (vert phosphore, pluie de caractères). La pluie se coupe avec « Réduire les animations » ou le contraste renforcé.
-- `seldon` (actif) : `codec` + univers de *Fondation* d'Asimov (ciel galactique, Radiant de Hari Seldon, Terminus, Encyclopédie Galactique, symboles de psychohistoire dans la pluie).
+- `seldon` : `codec` + univers de *Fondation* d'Asimov (ciel galactique, Radiant de Hari Seldon, Terminus, Encyclopédie Galactique, symboles de psychohistoire dans la pluie).
+- `fondation` (actif) : dominante *Fondation* (or impérial, espace profond, Radiant de Seldon, titres façon Encyclopédie Galactique), avec en touches la fréquence codec de Metal Gear et une pluie d'équations façon Matrix.
 
 En version statique, le thème actif se choisit dans `data/settings.json`.

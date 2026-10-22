@@ -14,6 +14,7 @@ final class Theme
         'defaut' => 'Sobre (par défaut)',
         'codec' => 'Codec : Metal Gear Solid × Matrix',
         'seldon' => 'Seldon : Metal Gear Solid × Matrix × Fondation',
+        'fondation' => 'Fondation : dominante Asimov, touches Metal Gear et Matrix',
     ];
 
     public static function available(): array
