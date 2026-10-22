@@ -12,3 +12,7 @@
         <li>GitHub : <a href="<?= e($profile['github']) ?>" rel="noopener">mes dépôts</a></li>
     <?php endif; ?>
 </ul>
+
+<?php if (empty($profile['email']) && empty($profile['linkedin']) && empty($profile['github'])): ?>
+    <p class="empty">Les moyens de contact seront bientôt ajoutés.</p>
+<?php endif; ?>

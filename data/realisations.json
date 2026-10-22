@@ -4,10 +4,28 @@
         "slug": "portfolio",
         "contexte": "Formation",
         "date": "2026-10-22",
-        "resume": "Création d'un site portfolio en PHP avec backoffice sécurisé, données en JSON, référencement et base de connaissances, hébergé sur AlwaysData.",
-        "competences": ["B1.3", "B1.4", "B1.5", "B1.6"],
-        "outils": ["PHP", "HTML", "CSS", "JavaScript", "JSON", "Git", "GitHub", "AlwaysData"],
-        "kb": ["deployer-portfolio-alwaysdata"],
-        "contenu": "## Contexte\n\nÀ compléter : pourquoi un portfolio, ce qui était demandé pour l'épreuve E5.\n\n## Objectifs\n\n- Présenter mon parcours et mes réalisations\n- Pouvoir mettre à jour le contenu sans toucher au code (backoffice)\n- Être bien référencé et accessible\n\n## Étapes\n\n1. Recherche de solutions (CMS, site statique, PHP)\n2. Choix de l'architecture et de l'hébergement\n3. Développement et tests en local\n4. Mise en ligne\n\n## Bilan\n\nÀ compléter : difficultés, solutions, ce que j'ai appris."
+        "resume": "Conception d'un site portfolio : pages de l'épreuve E5, données en JSON, référencement, base de connaissances, accessibilité et thèmes interchangeables. Publié en statique sur GitHub Pages ; backoffice PHP sécurisé prêt pour un hébergement PHP.",
+        "competences": [
+            "B1.3",
+            "B1.4",
+            "B1.5",
+            "B1.6"
+        ],
+        "outils": [
+            "PHP",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "JSON",
+            "Git",
+            "GitHub",
+            "GitHub Actions",
+            "GitHub Pages"
+        ],
+        "kb": [
+            "publier-portfolio-github-pages",
+            "deployer-portfolio-alwaysdata"
+        ],
+        "contenu": "## Contexte\n\nLe portfolio est demandé pour l'épreuve E5 du BTS SIO. À compléter : ce qui était demandé précisément et pour quand.\n\n## Exigences\n\n- Séparer HTML, CSS, JavaScript et PHP\n- Backoffice avec accès sécurisé\n- Données stockées en JSON\n- Référencement naturel (SEO)\n- Base de connaissances pour documenter les outils utilisés\n- Accessibilité\n\n## Étapes de recherche et de réalisation\n\n1. Recherche de solutions : CMS (WordPress), site statique (MkDocs), PHP sans framework\n2. Choix de PHP natif, à cause du backoffice et du PHP imposés\n3. Choix de l'hébergement : statique sur GitHub Pages d'abord, puis PHP (AlwaysData ou serveur personnel)\n4. Développement et tests en local\n5. Création du dépôt GitHub et publication automatique avec GitHub Actions\n6. Travail sur le design : plusieurs thèmes testés avant le choix final\n\n## Bilan\n\nÀ compléter : difficultés rencontrées, solutions trouvées, ce que j'ai appris."
     }
 ]

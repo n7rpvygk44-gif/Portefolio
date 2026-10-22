@@ -1,6 +1,14 @@
 [
     {
-        "titre": "Déployer le portfolio sur AlwaysData",
+        "titre": "Publier le portfolio sur GitHub Pages",
+        "slug": "publier-portfolio-github-pages",
+        "categorie": "Procédure",
+        "outil": "GitHub Pages",
+        "resume": "Mettre en ligne gratuitement la version statique du site, publiée automatiquement à chaque modification grâce à GitHub Actions.",
+        "contenu": "## Prérequis\n\n- Un compte GitHub et le dépôt du portfolio (public)\n- Le workflow `.github/workflows/pages.yml` présent dans le dépôt\n\n## Étapes\n\n1. Dans le dépôt, ouvrir **Settings › Pages**.\n2. Dans « Build and deployment », choisir **Source : GitHub Actions**.\n3. Ouvrir l'onglet **Actions**, choisir « Publier sur GitHub Pages », puis **Run workflow** (ou **Re-run all jobs** sur un essai échoué).\n4. Attendre que les deux étapes (build et deploy) soient vertes.\n\n## Fonctionnement\n\n- L'étape **build** lance `php bin/build-static.php`, qui génère toutes les pages en HTML dans `dist/`.\n- L'étape **deploy** publie `dist/` sur GitHub Pages.\n- Chaque push sur la branche `main` relance la publication automatiquement.\n\n## Vérification\n\n- Le site répond sur `https://<compte>.github.io/<dépôt>/`\n- `sitemap.xml` et `robots.txt` sont accessibles\n- En cas d'échec « Ensure GitHub Pages has been enabled », l'étape 2 n'a pas été faite."
+    },
+    {
+        "titre": "Déployer le portfolio sur AlwaysData (version PHP, prévue)",
         "slug": "deployer-portfolio-alwaysdata",
         "categorie": "Procédure",
         "outil": "AlwaysData",
