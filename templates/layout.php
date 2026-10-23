@@ -25,14 +25,14 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
     <meta property="og:description" content="<?= e($description) ?>">
     <meta property="og:url" content="<?= e($canonical) ?>">
     <meta property="og:site_name" content="<?= e($siteName) ?>">
-    <link rel="stylesheet" href="<?= e(url('/assets/css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset('/assets/css/style.css')) ?>">
     <?php if ($theme !== Theme::DEFAULT): ?>
-        <link rel="stylesheet" href="<?= e(url('/assets/css/themes/' . $theme . '.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset('/assets/css/themes/' . $theme . '.css')) ?>">
     <?php endif; ?>
-    <script src="<?= e(url('/assets/js/main.js')) ?>" defer></script>
-    <script src="<?= e(url('/assets/js/sound.js')) ?>" defer></script>
+    <script src="<?= e(asset('/assets/js/main.js')) ?>" defer></script>
+    <script src="<?= e(asset('/assets/js/sound.js')) ?>" defer></script>
     <?php if (Theme::hasScript($theme)): ?>
-        <script src="<?= e(url('/assets/js/themes/' . $theme . '.js')) ?>" defer></script>
+        <script src="<?= e(asset('/assets/js/themes/' . $theme . '.js')) ?>" defer></script>
     <?php endif; ?>
 </head>
 <body class="theme-<?= e($theme) ?>">

@@ -17,6 +17,15 @@ function url(string $path): string
     return rtrim($config['base_path'], '/') . page_path($path);
 }
 
+// Adresse d'un fichier CSS/JS avec une empreinte de son contenu (?v=…) : après une mise à jour,
+// le navigateur télécharge la nouvelle version au lieu de garder l'ancienne en cache.
+function asset(string $path): string
+{
+    $file = ROOT_DIR . '/public' . $path;
+    $version = is_file($file) ? substr(md5_file($file), 0, 10) : '';
+    return url($path) . ($version !== '' ? '?v=' . $version : '');
+}
+
 function page_path(string $path): string
 {
     global $config;
