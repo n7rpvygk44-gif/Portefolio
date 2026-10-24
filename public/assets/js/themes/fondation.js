@@ -62,18 +62,18 @@
             });
         });
         // 2. Rayons des sommets vers le dodécaèdre intérieur.
-        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([ICO_VERTS[k], dodeca[i], 0.3, 'chord'])));
+        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([ICO_VERTS[k], dodeca[i], 0.3])));
         // 3. Dodécaèdre intérieur (faces voisines reliées).
         ICO_FACES.forEach((f, i) => ICO_FACES.forEach((g, j) => {
             if (j > i && f.filter((k) => g.includes(k)).length === 2) {
-                lines.push([dodeca[i], dodeca[j], 0.45, 'chord']);
+                lines.push([dodeca[i], dodeca[j], 0.45]);
             }
         }));
         // 4. Icosaèdre intérieur et liaisons vers le dodécaèdre.
-        ICO_EDGES.forEach((e) => lines.push([innerIco[e.a], innerIco[e.b], 0.6, 'chord']));
-        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([dodeca[i], innerIco[k], 0.7, 'chord'])));
+        ICO_EDGES.forEach((e) => lines.push([innerIco[e.a], innerIco[e.b], 0.6]));
+        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([dodeca[i], innerIco[k], 0.7])));
         // 5. Fines branches vers le cœur.
-        innerIco.forEach((v) => lines.push([v, scale(v, 0.12), 0.85, 'chord']));
+        innerIco.forEach((v) => lines.push([v, scale(v, 0.12), 0.85]));
         // 6. Cordes en étoile : chaque sommet relié aux sommets non voisins, à travers le volume.
         ICO_VERTS.forEach((v, i) => ICO_VERTS.forEach((u, j) => {
             if (j > i && !ICO_EDGES.some((e) => (e.a === i && e.b === j) || (e.a === j && e.b === i)) && Math.hypot(v[0] + u[0], v[1] + u[1], v[2] + u[2]) > 0.2) {
@@ -86,8 +86,7 @@
     })();
 
     // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
-    // speed (rotation), static (une seule image), chords (fils qui traversent le volume : rayons,
-    // solides imbriqués et cordes en étoile).
+    // speed (rotation), static (une seule image), chords (cordes en étoile à travers le volume).
     function radiantPrime(options) {
         const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true, chords: true }, options);
         const canvas = document.createElement('canvas');
@@ -157,10 +156,6 @@
                 }
                 const a = project(A), b = project(B);
                 const zMid = (a[2] + b[2]) / 2;
-                if (!opts.chords && zMid > 0) {
-                    // Sans fils intérieurs, seul le motif des faces avant reste visible à travers l'objet.
-                    return;
-                }
                 const bucket = zMid > 0.25 ? 0 : zMid > -0.25 ? 1 : 2;
                 const key = at + '|' + bucket;
                 if (!groups.has(key)) {
@@ -900,8 +895,7 @@
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    // Le Radiant de l'introduction n'a aucun fil qui traverse le volume : seulement ses arêtes,
-    // le motif gravé sur ses faces et son cœur (choix d'Olivier).
+    // Le Radiant de l'introduction n'a pas de cordes en étoile (choix d'Olivier).
     const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false, false);
     stage.append(sphere('sphere', T.rings), introCore);
     // Les anneaux de l'introduction sont posés directement dans la scène.
