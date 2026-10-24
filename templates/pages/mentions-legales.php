@@ -27,8 +27,8 @@
 
 <h2>Propriété intellectuelle et crédits</h2>
 <p>
-    Les textes et illustrations (planètes, vaisseau, Radiant) sont des créations originales.
-    Les univers évoqués (<i>Fondation</i> d'Isaac Asimov, <i>Death Stranding</i>, <i>Matrix</i>) sont cités comme inspiration et restent la propriété de leurs auteurs ; aucun visuel officiel n'est reproduit.
+    Les textes, illustrations et animations (Trantor, Radiant) sont des créations originales.
+    L'univers de <i>Fondation</i>, d'Isaac Asimov et de la série adaptée par Apple TV+, est cité comme inspiration et reste la propriété de ses auteurs ; aucun visuel officiel n'est reproduit.
 </p>
 <p>Le code source du site est publié sous licence MIT<?php if (!empty($profile['github'])): ?> sur <a href="<?= e($profile['github']) ?>" rel="noopener">GitHub</a><?php endif; ?>.</p>
 
