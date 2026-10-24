@@ -389,8 +389,8 @@
     }
 
     // Réseau du Radiant (introduction complète) : une sphère de verre maillée enveloppe le Radiant ;
-    // un filet de poussière monte du cœur, puis des filaments dorés relient des nœuds qui éclatent
-    // en étoiles aux vrilles scintillantes, comme une toile cosmique.
+    // un filet de poussière monte du cœur, puis des filaments dorés relient des points répartis
+    // dans la sphère, comme une toile cosmique.
     function radiantWeb() {
         const rnd = (a, b) => a + Math.random() * (b - a);
         const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
@@ -410,23 +410,7 @@
             const a = (i / nodeCount) * 6.283 + rnd(-0.25, 0.25);
             const r = rnd(0.55, 0.85);
             const y = rnd(-0.15, 0.6);
-            const tendrils = [];
-            for (let t = 0; t < 12; t++) {
-                // Vrille : marche aléatoire en zigzag, en pixels relatifs à la taille de la sphère.
-                let ang = Math.random() * 6.283;
-                const pts = [[0, 0]];
-                let x = 0, yy = 0;
-                const steps = 4 + Math.floor(Math.random() * 6);
-                for (let s = 0; s < steps; s++) {
-                    ang += rnd(-0.9, 0.9);
-                    const len = rnd(0.012, 0.03);
-                    x += Math.cos(ang) * len;
-                    yy += Math.sin(ang) * len;
-                    pts.push([x, yy]);
-                }
-                tendrils.push(pts);
-            }
-            nodes.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r], tendrils, lit: 1 });
+            nodes.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r] });
         }
         // Filaments : une chaîne qui fait le tour, deux liaisons transverses, et le filet qui monte du cœur.
         const links = [[-1, 0]];
@@ -455,14 +439,6 @@
                 });
             }
             return { A, B, C, a, b, grains, start: 0.32 + index * 0.022 };
-        });
-        edges.forEach((e) => {
-            if (e.b >= 0) {
-                nodes[e.b].lit = Math.min(nodes[e.b].lit, e.start + 0.06);
-            }
-            if (e.a >= 0) {
-                nodes[e.a].lit = Math.min(nodes[e.a].lit, e.start + 0.06);
-            }
         });
         const bez = (e, u, i) => (1 - u) * (1 - u) * e.A[i] + 2 * (1 - u) * u * e.C[i] + u * u * e.B[i];
 
@@ -525,39 +501,6 @@
                     const q = project(bez(e, u, 0) + g.off[0] * thick, bez(e, u, 1) + g.off[1] * thick, bez(e, u, 2) + g.off[2] * thick);
                     const twinkle = 0.55 + 0.45 * Math.sin(sec * 5 + g.tw);
                     dot(c, q[0], q[1], g.size, g.col, twinkle * appear * 0.95);
-                }
-            }
-            // Nœuds : éclat lumineux et vrilles qui se déploient en zigzag.
-            const scale = Rw;
-            for (const node of nodes) {
-                const burst = ease((k - node.lit) / 0.07);
-                if (burst <= 0) {
-                    continue;
-                }
-                const q = project(node.p[0], node.p[1], node.p[2]);
-                const x0 = q[0], y0 = q[1];
-                const glow = c.createRadialGradient(x0, y0, 0, x0, y0, scale * 0.07);
-                glow.addColorStop(0, 'rgba(255, 210, 120, ' + (0.75 * burst * appear).toFixed(3) + ')');
-                glow.addColorStop(1, 'rgba(255, 210, 120, 0)');
-                c.fillStyle = glow;
-                c.fillRect(x0 - scale * 0.07, y0 - scale * 0.07, scale * 0.14, scale * 0.14);
-                c.strokeStyle = 'rgba(190, 135, 30, ' + (0.6 * appear).toFixed(3) + ')';
-                c.lineWidth = 0.7;
-                c.beginPath();
-                for (const pts of node.tendrils) {
-                    const upto = Math.max(1, Math.round((pts.length - 1) * burst));
-                    c.moveTo(x0, y0);
-                    for (let i = 1; i <= upto; i++) {
-                        c.lineTo(x0 + pts[i][0] * scale, y0 + pts[i][1] * scale);
-                    }
-                }
-                c.stroke();
-                for (const pts of node.tendrils) {
-                    const upto = Math.max(1, Math.round((pts.length - 1) * burst));
-                    for (let i = 1; i <= upto; i++) {
-                        const twinkle = 0.5 + 0.5 * Math.sin(sec * 7 + i * 1.7 + pts[i][0] * 400);
-                        dot(c, x0 + pts[i][0] * scale, y0 + pts[i][1] * scale, 1.6, [214, 160, 50], twinkle * appear);
-                    }
                 }
             }
         };
