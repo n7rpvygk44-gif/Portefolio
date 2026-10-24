@@ -279,15 +279,15 @@
 
     // ----- Poussière du Radiant -----
     // Teintes soutenues pour rester visibles sur l'ivoire de la pièce. L'or et l'argent dominent ;
-    // le bleu, le rouge, le vert, le violet et l'orange restent des touches discrètes.
+    // le bleu, le rouge, le vert, le violet et l'orange ne sont que de rares touches.
     const DUST = [
-        [200, 140, 30, 0.38],    // or
-        [120, 132, 152, 0.30],   // argent
-        [50, 110, 200, 0.10],    // bleu
-        [205, 55, 60, 0.055],    // rouge
-        [30, 150, 95, 0.055],    // vert
-        [130, 70, 205, 0.055],   // violet
-        [232, 120, 25, 0.055],   // orange
+        [200, 140, 30, 0.50],    // or
+        [120, 132, 152, 0.40],   // argent
+        [50, 110, 200, 0.03],    // bleu
+        [205, 55, 60, 0.0175],   // rouge
+        [30, 150, 95, 0.0175],   // vert
+        [130, 70, 205, 0.0175],  // violet
+        [232, 120, 25, 0.0175],  // orange
     ];
     function dustColour() {
         let r = Math.random();
@@ -394,16 +394,16 @@
         const s = dustCanvas('radiant-galaxy' + (arrive ? ' free' : ''));
         const { canvas, c } = s;
         const small = window.innerWidth < 760;
-        const count = small ? 1500 : 3800;
+        const count = small ? 2800 : 7000;
         const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
         const parts = [];
         for (let i = 0; i < count; i++) {
             const kind = Math.random();
-            const p = { col: dustColour(), size: Math.random() < 0.08 ? 2.6 : 0.8 + Math.random() * 1.2, tw: Math.random() * 6.28 };
+            const p = { col: dustColour(), size: Math.random() < 0.05 ? 2.3 : 0.5 + Math.random() * 0.9, tw: Math.random() * 6.28 };
             if (kind < 0.66) {
                 // Bras spiraux (galaxie à 3 bras), larges et espacés.
                 const arm = Math.floor(Math.random() * 3);
-                p.r = 0.1 + Math.random() * 0.95;
+                p.r = 0.1 + Math.random() * 1.2;
                 p.a = arm * 2.094 + p.r * 3.8 + gauss() * 0.5;
                 p.y = gauss() * 0.12;
             } else if (kind < 0.78) {
@@ -414,16 +414,16 @@
             } else {
                 // Sphère de poussière, épaisse et clairsemée, qui enveloppe la galaxie.
                 const u = Math.random() * 2 - 1;
-                const shell = 0.95 + Math.random() * 0.55;
+                const shell = 1 + Math.random() * 0.9;
                 p.sphere = true;
                 p.r = Math.sqrt(1 - u * u) * shell;
                 p.a = Math.random() * 6.28;
                 p.y = u * shell;
             }
-            p.emit = arrive ? Math.random() * 0.1 : 0.17 + Math.random() * 0.2;   // moment où la particule jaillit
-            p.flight = arrive ? 0.14 + Math.random() * 0.1 : 0.12 + Math.random() * 0.1;
+            p.emit = arrive ? Math.random() * 0.06 : 0.17 + Math.random() * 0.2;   // moment où la particule jaillit
+            p.flight = arrive ? 0.1 + Math.random() * 0.12 : 0.12 + Math.random() * 0.1;
             p.swirl = 2.5 + Math.random() * 2.5;     // tours de spirale pendant le vol
-            p.land = 0.45 + Math.random() * 0.12;    // (arrivée) départ vers la page
+            p.land = 0.15 + Math.random() * 0.4;     // (arrivée) départ vers la page, échelonné pour un mouvement continu
             parts.push(p);
         }
         let targets = null;
@@ -438,20 +438,20 @@
             const { w, h, dpr } = s;
             const sec = (now - t0) / 1000;
             const k = sec / total;                       // avancement 0..1
-            if (arrive && !targets && k > 0.4) {
+            if (arrive && !targets && k > 0.1) {
                 const points = samplePage(Math.round(count * 0.75));
                 targets = parts.map((p, i) => points[i] || null);
             }
             c.setTransform(dpr, 0, 0, dpr, 0, 0);
             c.clearRect(0, 0, w, h);
             const cx = w / 2, cy = h / 2;
-            const base = Math.min(w, h) * 0.42;
+            const base = Math.min(w, h) * 0.46;
             // Taille de la galaxie : elle grandit puis envahit la pièce à la fin de l'introduction complète.
             const R = base * (arrive ? 1 : 1 + 2.2 * ease((k - 0.72) / 0.2));
             const tilt = 1.05 - 0.35 * ease((k - 0.4) / 0.4);      // le disque se redresse
             const yaw = sec * 0.12;
             const ct = Math.cos(tilt), st = Math.sin(tilt);
-            const fadeOut = arrive ? 1 - ease((k - 0.8) / 0.2) : 1 - ease((k - 0.86) / 0.08);
+            const fadeOut = arrive ? 1 : 1 - ease((k - 0.86) / 0.08);
             for (let i = 0; i < parts.length; i++) {
                 const p = parts[i];
                 const life = (k - p.emit) / p.flight;
@@ -472,12 +472,14 @@
                 let px = cx + x * R * persp;
                 let py = cy - y * R * persp;
                 let col = p.col;
-                let size = p.size * persp * (arrive ? 1.3 : 1 + 1.5 * ease((k - 0.72) / 0.2));
+                let size = p.size * persp * (arrive ? 2 : 1 + 1.5 * ease((k - 0.72) / 0.2));
                 let fade = fadeOut;
                 if (arrive) {
                     // Les particules vont se poser sur la nouvelle page et prennent sa couleur.
                     const target = targets && targets[i];
-                    const m = ease((k - p.land) / 0.25);
+                    const m = ease((k - p.land) / 0.22);
+                    // Posée, la particule s'éteint et laisse place au texte.
+                    fade *= 1 - ease((k - p.land - 0.2) / 0.12);
                     if (target) {
                         px = mix(px, target.x, m);
                         py = mix(py, target.y, m);
@@ -494,7 +496,7 @@
                 dot(c, px, py, size, col, Math.min(1, life * 2) * twinkle * fade * (0.6 + 0.4 * persp));
             }
             // Lueur du noyau galactique.
-            const glow = (arrive ? 1 - ease((k - 0.4) / 0.3) : ease((k - 0.2) / 0.2)) * fadeOut;
+            const glow = (arrive ? 1 - ease((k - 0.15) / 0.35) : ease((k - 0.2) / 0.2)) * fadeOut;
             if (glow > 0) {
                 const g = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.35);
                 g.addColorStop(0, 'rgba(255, 214, 140, ' + (0.55 * glow) + ')');
@@ -519,14 +521,13 @@
         const { c, w, h, dpr } = s;
         const points = samplePage(window.innerWidth < 760 ? 1800 : 4200);
         const cx = w / 2, cy = h / 2;
-        // 0 à 0,3 s : la page se change en poussière sur place ; ensuite la poussière tourbillonne vers le cœur.
-        const hold = 0.3;
-        const duration = 1.5;
+        // La page se change en poussière qui, sans s'arrêter, gonfle légèrement puis tourbillonne vers le cœur.
+        const duration = 0.85;
         const parts = points.map((pt) => {
             const dx = pt.x - cx, dy = pt.y - cy;
             return {
                 r: Math.hypot(dx, dy), a: Math.atan2(dy, dx), from: pt.col, to: dustColour(),
-                delay: Math.random() * 0.25, swirl: (1.2 + Math.random() * 2) * (Math.random() < 0.5 ? -1 : 1),
+                delay: Math.random() * 0.12, burst: 20 + Math.random() * 50, orbit: 6 + Math.random() * 28, swirl: (1.2 + Math.random() * 2) * (Math.random() < 0.5 ? -1 : 1),
                 size: Math.random() < 0.06 ? 2.6 : 1 + Math.random() * 1.2, tw: Math.random() * 6.28,
             };
         });
@@ -541,16 +542,17 @@
             c.setTransform(dpr, 0, 0, dpr, 0, 0);
             c.clearRect(0, 0, w, h);
             for (const p of parts) {
-                const m = Math.max(0, Math.min(1, (sec - hold - p.delay) / (duration - hold - 0.35)));
-                const pull = m * m * (3 - 2 * m);
-                // Spirale vers le cœur du Radiant, au centre de l'écran.
-                const rad = p.r * (1 - pull);
-                const ang = p.a + p.swirl * pull;
+                const m = Math.max(0, Math.min(1, (sec - p.delay) / (duration - 0.2)));
+                const pull = m * m * m;   // accélère en approchant du cœur
+                // Spirale vers le cœur du Radiant, au centre de l'écran, après une brève poussée vers l'extérieur.
+                // Arrivée au cœur, elle continue de tourner sur une petite orbite.
+                const rad = p.r * (1 - pull) + p.burst * Math.sin(Math.min(1, m * 2) * 3.1416) * (1 - pull) + p.orbit * pull;
+                const ang = p.a + p.swirl * pull + sec * 4 * pull;
                 const colour = [mix(p.from[0], p.to[0], ease(m * 1.6)), mix(p.from[1], p.to[1], ease(m * 1.6)), mix(p.from[2], p.to[2], ease(m * 1.6))];
                 const twinkle = 0.7 + 0.3 * Math.sin(sec * 8 + p.tw);
-                dot(c, cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad, mix(1.3, p.size, ease(m * 2)), colour, ease(sec / 0.2) * twinkle * (1 - 0.6 * ease((m - 0.85) / 0.15)));
+                dot(c, cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad, mix(1.3, p.size, ease(m * 2)), colour, ease(sec / 0.08) * twinkle * (1 - 0.6 * ease((m - 0.85) / 0.15)));
             }
-            const glow = ease((sec - 0.8) / 0.6);
+            const glow = ease((sec - 0.35) / 0.45);
             if (glow > 0) {
                 const g = c.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.18);
                 g.addColorStop(0, 'rgba(255, 214, 140, ' + (0.7 * glow) + ')');
@@ -558,12 +560,14 @@
                 c.fillStyle = g;
                 c.fillRect(0, 0, w, h);
             }
-            if (sec < duration) {
-                requestAnimationFrame(draw);
-            } else {
+            // L'animation continue pendant le chargement de la page suivante : aucun temps d'arrêt.
+            if (!left && sec > duration - 0.3) {
+                left = true;
                 location.href = href;
             }
+            requestAnimationFrame(draw);
         }
+        let left = false;
         requestAnimationFrame(draw);
         // Retour arrière depuis le cache du navigateur : la page réapparaît intacte.
         window.addEventListener('pageshow', () => { root.classList.remove('leaving'); s.canvas.remove(); }, { once: true });
@@ -783,7 +787,7 @@
         seen = false;
     }
     const FULL = { total: 12, wake: 2, rings: [2.4, 3.6, 4.8, 6], ringDur: 3.2, outDur: 0.9 };
-    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 1.2 };
+    const SHORT = { total: 3, wake: 0.3, rings: [0.1, 0.25, 0.4, 0.55], ringDur: 1.1, outDur: 2.2 };
     const T = seen ? SHORT : FULL;
     T.end = T.total - T.outDur;
 
