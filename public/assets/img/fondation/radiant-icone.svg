@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<defs><radialGradient id="g"><stop offset="0" stop-color="#fff6dc"/><stop offset=".35" stop-color="#f3c063"/><stop offset="1" stop-color="#f3c063" stop-opacity="0"/></radialGradient></defs>
+<polygon points="12.00,2.00 20.66,7.00 20.66,17.00 12.00,22.00 3.34,17.00 3.34,7.00" fill="#3a2a12" fill-opacity=".85" stroke="#c8952f" stroke-width="1.1" stroke-linejoin="round"/>
+<circle cx="12" cy="12" r="5" fill="url(#g)"/>
+<line x1="12.00" y1="6.80" x2="3.34" y2="7.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="12.00" y1="6.80" x2="12.00" y2="2.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="12.00" y1="6.80" x2="20.66" y2="7.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="12.00" y1="6.80" x2="16.50" y2="14.60" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="16.50" y1="14.60" x2="20.66" y2="7.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="16.50" y1="14.60" x2="20.66" y2="17.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="16.50" y1="14.60" x2="12.00" y2="22.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="16.50" y1="14.60" x2="7.50" y2="14.60" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="7.50" y1="14.60" x2="12.00" y2="22.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="7.50" y1="14.60" x2="3.34" y2="17.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="7.50" y1="14.60" x2="3.34" y2="7.00" stroke="#d9ad55" stroke-width=".6"/>
+<line x1="7.50" y1="14.60" x2="12.00" y2="6.80" stroke="#d9ad55" stroke-width=".6"/>
+</svg>

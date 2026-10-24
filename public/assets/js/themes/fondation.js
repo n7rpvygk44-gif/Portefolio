@@ -15,6 +15,267 @@
     const svgNS = 'http://www.w3.org/2000/svg';
     const root = document.documentElement;
 
+    // ----- Le Radiant Prime en 3D (canvas, sans bibliothèque) -----
+    // Icosaèdre de verre ambré, treillis doré intérieur (dodécaèdre et icosaèdre imbriqués,
+    // rayons vers les faces), cœur lumineux qui pulse. Création originale d'après la forme
+    // géométrique du Radiant ; le rendu 3D est calculé à la main (rotation + perspective).
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const ICO_VERTS = [
+        [-1, PHI, 0], [1, PHI, 0], [-1, -PHI, 0], [1, -PHI, 0],
+        [0, -1, PHI], [0, 1, PHI], [0, -1, -PHI], [0, 1, -PHI],
+        [PHI, 0, -1], [PHI, 0, 1], [-PHI, 0, -1], [-PHI, 0, 1],
+    ].map((v) => { const l = Math.hypot(v[0], v[1], v[2]); return v.map((c) => c / l); });
+    const ICO_FACES = [
+        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
+        [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+        [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
+        [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1],
+    ];
+    const scale = (v, k) => [v[0] * k, v[1] * k, v[2] * k];
+    const mid = (...vs) => { const m = [0, 0, 0]; vs.forEach((v) => { m[0] += v[0] / vs.length; m[1] += v[1] / vs.length; m[2] += v[2] / vs.length; }); return m; };
+    const unit = (v) => { const l = Math.hypot(v[0], v[1], v[2]); return scale(v, 1 / l); };
+    const lerp = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+
+    // Arêtes de l'icosaèdre (chaque paire de sommets partagée par deux faces).
+    const ICO_EDGES = [];
+    ICO_FACES.forEach((f) => [[f[0], f[1]], [f[1], f[2]], [f[2], f[0]]].forEach(([a, b]) => {
+        const key = Math.min(a, b) + '-' + Math.max(a, b);
+        if (!ICO_EDGES.some((e) => e.key === key)) {
+            ICO_EDGES.push({ key, a, b });
+        }
+    }));
+
+    // Treillis intérieur : liste de segments [point A, point B, niveau d'apparition 0..1].
+    const LATTICE = (() => {
+        const lines = [];
+        const centroids = ICO_FACES.map((f) => mid(ICO_VERTS[f[0]], ICO_VERTS[f[1]], ICO_VERTS[f[2]]));
+        const dodeca = centroids.map((c) => scale(unit(c), 0.6));
+        const innerIco = ICO_VERTS.map((v) => scale(v, 0.32));
+        // 1. Motif gravé sur chaque face : triangle intérieur relié aux sommets.
+        ICO_FACES.forEach((f, i) => {
+            const c = centroids[i];
+            const tri = f.map((k) => lerp(ICO_VERTS[k], c, 0.45));
+            tri.forEach((p, j) => {
+                lines.push([p, tri[(j + 1) % 3], 0.1]);
+                lines.push([ICO_VERTS[f[j]], p, 0.05]);
+                lines.push([p, lerp(ICO_VERTS[f[(j + 1) % 3]], ICO_VERTS[f[(j + 2) % 3]], 0.5), 0.2]);
+            });
+        });
+        // 2. Rayons des sommets vers le dodécaèdre intérieur.
+        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([ICO_VERTS[k], dodeca[i], 0.3])));
+        // 3. Dodécaèdre intérieur (faces voisines reliées).
+        ICO_FACES.forEach((f, i) => ICO_FACES.forEach((g, j) => {
+            if (j > i && f.filter((k) => g.includes(k)).length === 2) {
+                lines.push([dodeca[i], dodeca[j], 0.45]);
+            }
+        }));
+        // 4. Icosaèdre intérieur et liaisons vers le dodécaèdre.
+        ICO_EDGES.forEach((e) => lines.push([innerIco[e.a], innerIco[e.b], 0.6]));
+        ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([dodeca[i], innerIco[k], 0.7])));
+        // 5. Fines branches vers le cœur.
+        innerIco.forEach((v) => lines.push([v, scale(v, 0.12), 0.85]));
+        return lines;
+    })();
+
+    // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
+    // speed (rotation), static (une seule image).
+    function radiantPrime(options) {
+        const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true }, options);
+        const canvas = document.createElement('canvas');
+        canvas.className = 'radiant-prime';
+        canvas.setAttribute('aria-hidden', 'true');
+        const ctx2d = canvas.getContext('2d');
+        let size = opts.size;
+        let dpr = 1;
+        function resize(px) {
+            size = px;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(size * dpr);
+            canvas.height = Math.round(size * dpr);
+            canvas.style.width = size + 'px';
+            canvas.style.height = size + 'px';
+        }
+        resize(size);
+
+        let level = opts.level;
+        let target = opts.level;
+        let fade = 0;
+        let time = 0;
+        let last = 0;
+        let visible = true;
+        let frame = 0;
+
+        function draw() {
+            const c = ctx2d;
+            const w = size;
+            const R = w * 0.36;
+            const cx = w / 2;
+            const cy = w / 2;
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            c.clearRect(0, 0, w, w);
+            const yaw = time * 0.25 * opts.speed;
+            const pitch = 0.35 + Math.sin(time * 0.17 * opts.speed) * 0.25;
+            const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+            const project = (v) => {
+                const x1 = v[0] * cyw + v[2] * syw;
+                const z1 = -v[0] * syw + v[2] * cyw;
+                const y2 = v[1] * cp - z1 * sp;
+                const z2 = v[1] * sp + z1 * cp;
+                const k = 3.2 / (3.2 + z2);
+                return [cx + x1 * R * k, cy - y2 * R * k, z2];
+            };
+            const P = ICO_VERTS.map(project);
+            const pulse = 0.85 + 0.15 * Math.sin(time * 1.6);
+            const glow = level * pulse;
+
+            // Halo derrière l'objet.
+            const halo = c.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
+            halo.addColorStop(0, 'rgba(255, 214, 140, ' + (0.35 * glow) + ')');
+            halo.addColorStop(1, 'rgba(255, 214, 140, 0)');
+            c.fillStyle = halo;
+            c.fillRect(0, 0, w, w);
+
+            // Faces : verre ambré fumé, celles de derrière d'abord.
+            const faces = ICO_FACES.map((f) => {
+                const a = P[f[0]], b = P[f[1]], d = P[f[2]];
+                const facing = (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]);
+                return { f, z: (a[2] + b[2] + d[2]) / 3, back: facing > 0 };
+            }).sort((m, n) => n.z - m.z);
+            const paint = (face) => {
+                const [a, b, d] = face.f.map((k) => P[k]);
+                c.beginPath();
+                c.moveTo(a[0], a[1]);
+                c.lineTo(b[0], b[1]);
+                c.lineTo(d[0], d[1]);
+                c.closePath();
+                c.fillStyle = face.back ? 'rgba(46, 32, 14, 0.78)' : 'rgba(150, 105, 35, ' + (0.1 + 0.05 * Math.max(0, -face.z)) + ')';
+                c.fill();
+            };
+            faces.filter((x) => x.back).forEach(paint);
+
+            // Treillis doré intérieur (lumière additive). Les segments sont regroupés par niveau
+            // d'apparition et par profondeur pour limiter le nombre de tracés (fluidité).
+            c.globalCompositeOperation = 'lighter';
+            c.lineCap = 'round';
+            c.lineWidth = Math.max(0.8, w / 260);
+            const groups = new Map();
+            LATTICE.forEach(([A, B, at]) => {
+                const a = project(A), b = project(B);
+                const bucket = (a[2] + b[2]) < -0.3 ? 0 : (a[2] + b[2]) < 0.4 ? 1 : 2;
+                const key = at + '|' + bucket;
+                if (!groups.has(key)) {
+                    groups.set(key, { at, bucket, pts: [] });
+                }
+                groups.get(key).pts.push(a, b);
+            });
+            groups.forEach(({ at, bucket, pts }) => {
+                const show = Math.min(1, Math.max(0, (fade - at) / 0.25));
+                const depth = [1, 0.75, 0.5][bucket];
+                c.strokeStyle = 'rgba(240, 190, 90, ' + (0.85 * depth * (0.35 + 0.65 * show * glow)) + ')';
+                c.beginPath();
+                for (let i = 0; i < pts.length; i += 2) {
+                    c.moveTo(pts[i][0], pts[i][1]);
+                    c.lineTo(pts[i + 1][0], pts[i + 1][1]);
+                }
+                c.stroke();
+            });
+
+            // Cœur lumineux.
+            if (glow > 0.02) {
+                const core = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.42 * (0.8 + 0.3 * glow));
+                core.addColorStop(0, 'rgba(255, 255, 245, ' + Math.min(1, 1.1 * glow) + ')');
+                core.addColorStop(0.18, 'rgba(255, 236, 180, ' + (0.9 * glow) + ')');
+                core.addColorStop(0.5, 'rgba(255, 190, 90, ' + (0.35 * glow) + ')');
+                core.addColorStop(1, 'rgba(255, 170, 60, 0)');
+                c.fillStyle = core;
+                c.beginPath();
+                c.arc(cx, cy, R * 0.5, 0, Math.PI * 2);
+                c.fill();
+                // Éclats en étoile.
+                c.strokeStyle = 'rgba(255, 245, 210, ' + (0.5 * glow) + ')';
+                c.lineWidth = 1;
+                for (let i = 0; i < 6; i++) {
+                    const ang = i * Math.PI / 3 + time * 0.2;
+                    const len = R * (0.18 + 0.06 * Math.sin(time * 2 + i)) * glow;
+                    c.beginPath();
+                    c.moveTo(cx, cy);
+                    c.lineTo(cx + Math.cos(ang) * len, cy + Math.sin(ang) * len);
+                    c.stroke();
+                }
+            }
+            c.globalCompositeOperation = 'source-over';
+
+            // Faces avant (verre translucide) puis arêtes dorées.
+            faces.filter((x) => !x.back).forEach(paint);
+            ICO_EDGES.forEach((e) => {
+                const a = P[e.a], b = P[e.b];
+                const front = (a[2] + b[2]) < 0.2;
+                c.strokeStyle = front ? 'rgba(214, 168, 72, 0.95)' : 'rgba(170, 125, 45, 0.55)';
+                c.lineWidth = front ? Math.max(1.4, w / 130) : Math.max(1, w / 220);
+                c.beginPath();
+                c.moveTo(a[0], a[1]);
+                c.lineTo(b[0], b[1]);
+                c.stroke();
+            });
+            // Reflet sur le verre.
+            const shine = c.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+            shine.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+            shine.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+            c.fillStyle = shine;
+            c.beginPath();
+            c.arc(cx, cy, R * 1.05, 0, Math.PI * 2);
+            c.fill();
+        }
+
+        function loop(now) {
+            frame = 0;
+            const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+            last = now;
+            time += dt;
+            level += (target - level) * Math.min(1, dt * 2.5);
+            if (target > 0.3) {
+                fade = Math.min(1.3, fade + dt * 0.55);
+            }
+            draw();
+            if (visible) {
+                frame = requestAnimationFrame(loop);
+            }
+        }
+
+        if (opts.static) {
+            fade = 1.3;
+            time = 1.2;
+            draw();
+        } else {
+            fade = opts.level > 0.3 ? 1.3 : 0.2;
+            frame = requestAnimationFrame(loop);
+            // Pause quand le Radiant n'est pas à l'écran.
+            if (opts.observe && 'IntersectionObserver' in window) {
+                new IntersectionObserver((entries) => {
+                    visible = entries[0].isIntersecting;
+                    if (visible && !frame) {
+                        last = 0;
+                        frame = requestAnimationFrame(loop);
+                    }
+                }).observe(canvas);
+            }
+        }
+
+        return {
+            canvas,
+            resize: (px) => { resize(px); if (opts.static) { draw(); } },
+            // Éveil : le cœur s'allume et le treillis s'illumine progressivement.
+            wake(level0) {
+                target = level0 === undefined ? 1 : level0;
+                fade = Math.min(fade, 0.2);
+                if (!frame && !opts.static) {
+                    last = 0;
+                    frame = requestAnimationFrame(loop);
+                }
+            },
+        };
+    }
+
     // ----- Décor : Trantor -----
     const scene = document.createElement('div');
     scene.className = 'fondation-scene';
@@ -97,17 +358,26 @@
         });
         return el;
     }
-    function core() {
-        const el = document.createElement('div');
-        el.className = 'radiant-core';
-        el.setAttribute('aria-hidden', 'true');
-        return el;
+    // Le Radiant au centre d'une scène : un canvas 3D, ou rien si les animations sont réduites
+    // (dans ce cas une image fixe est dessinée).
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches || root.classList.contains('a11y-motion');
+    function core(size, level, observe) {
+        const r = radiantPrime({ size, level: level === undefined ? 1 : level, static: calm, observe: observe !== false });
+        r.canvas.classList.add('radiant-core');
+        r.canvas.radiant = r;
+        return r.canvas;
     }
 
     // ----- Le Radiant de l'accueil -----
     const radiant = document.querySelector('.radiant');
     if (radiant) {
-        radiant.prepend(sphere('radiant-sphere'), core());
+        radiant.prepend(sphere('radiant-sphere'), core(window.innerWidth > 760 ? 170 : 130));
+    }
+    const hero = document.querySelector('.hero');
+    if (hero) {
+        const heroRadiant = core(170, 0.85);
+        heroRadiant.classList.add('hero-radiant');
+        hero.appendChild(heroRadiant);
     }
 
     // ----- Cinématique -----
@@ -205,7 +475,8 @@
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    stage.append(sphere('sphere', T.rings), core());
+    const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false);
+    stage.append(sphere('sphere', T.rings), introCore);
     // Les anneaux de l'introduction sont posés directement dans la scène.
     const introSphere = stage.firstChild;
     while (introSphere.firstChild) {
@@ -261,6 +532,7 @@
         }
         running = true;
         intro.classList.add('active');
+        introCore.radiant.wake(1);
         if (window.portfolioSound) {
             if (seen) {
                 window.portfolioSound.playIntro(T, 'short');

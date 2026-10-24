@@ -150,14 +150,13 @@
     align-items: center;
     gap: 0.8rem;
 }
-/* Le Radiant en miniature : losange d'obsidienne aux arêtes dorées */
+/* Le Radiant en miniature : icosaèdre ambré aux arêtes dorées */
 .theme-fondation .brand::before {
     content: "";
-    width: 0.8rem;
-    height: 0.8rem;
-    transform: rotate(45deg);
-    background: linear-gradient(135deg, #2a3042, var(--ink) 60%);
-    box-shadow: 0 0 0 1px var(--gold), 0 0 12px rgba(243, 192, 99, 0.8);
+    width: 1.35rem;
+    height: 1.35rem;
+    background: url("../../img/fondation/radiant-icone.svg") center / contain no-repeat;
+    filter: drop-shadow(0 0 5px rgba(243, 192, 99, 0.7));
 }
 .theme-fondation .sound-toggle { padding: 0; border-radius: 50%; letter-spacing: 0; background: var(--surface-strong); backdrop-filter: blur(8px); color: var(--text); border: 1px solid var(--border); box-shadow: 0 6px 18px rgba(80, 60, 20, 0.12); }
 .theme-fondation .sound-toggle[aria-pressed="true"] { border-color: var(--gold); color: var(--accent); box-shadow: 0 0 18px rgba(243, 192, 99, 0.6); }
@@ -220,27 +219,18 @@
 .theme-fondation .hero > * { grid-column: 1; }
 .theme-fondation .hero h1 { font-size: 2.6rem; font-weight: 400; letter-spacing: 0.22em; margin: 0 0 0.75rem; }
 .theme-fondation .subtitle { font: 500 0.74rem/1.6 var(--display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
-/* Le Radiant posé, à droite du panneau */
-.theme-fondation .hero::after {
-    content: "";
+/* Le Radiant posé, à droite du panneau (canvas ajouté par fondation.js) */
+.theme-fondation .hero .hero-radiant {
+    position: static;
+    transform: none;
     grid-column: 2;
     grid-row: 1 / span 4;
     align-self: center;
     justify-self: center;
-    width: 84px;
-    height: 84px;
-    transform: rotate(45deg);
-    background:
-        linear-gradient(135deg, transparent 48%, rgba(243, 192, 99, 0.9) 49.5% 50.5%, transparent 52%),
-        linear-gradient(45deg, transparent 48%, rgba(243, 192, 99, 0.6) 49.5% 50.5%, transparent 52%),
-        linear-gradient(135deg, #313849, var(--ink) 55%, #0c0f17);
-    box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.7), 0 0 50px rgba(243, 192, 99, 0.55), 0 30px 40px rgba(20, 20, 30, 0.25);
-    animation: radiant-float 7s ease-in-out infinite;
 }
-@keyframes radiant-float { 50% { transform: rotate(45deg) translate(-6px, -6px); box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.9), 0 0 70px rgba(243, 192, 99, 0.75), 0 40px 46px rgba(20, 20, 30, 0.18); } }
 @media (max-width: 760px) {
     .theme-fondation .hero { display: block; padding: 2rem 1.25rem 1.5rem; }
-    .theme-fondation .hero::after { display: none; }
+    .theme-fondation .hero .hero-radiant { display: none; }
     .theme-fondation .hero h1 { font-size: 1.8rem; letter-spacing: 0.14em; }
 }
 
@@ -274,23 +264,15 @@
 .ring text { fill: #9a6a17; font: 3.2px var(--font); letter-spacing: 0.4px; }
 @keyframes ring-spin { to { transform: rotate(360deg); } }
 @keyframes sphere-turn { to { transform: rotateY(360deg); } }
-/* Cœur : le Radiant lui-même, losange d'obsidienne */
+/* Cœur : le Radiant Prime en 3D (canvas dessiné par fondation.js), centré dans sa scène */
 .radiant-core {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 64px;
-    height: 64px;
-    margin: -32px 0 0 -32px;
-    transform: rotate(45deg);
-    background:
-        linear-gradient(135deg, transparent 48%, rgba(243, 192, 99, 0.95) 49.5% 50.5%, transparent 52%),
-        linear-gradient(45deg, transparent 48%, rgba(243, 192, 99, 0.7) 49.5% 50.5%, transparent 52%),
-        linear-gradient(135deg, #343b4d, var(--ink) 55%, #0b0e15);
-    box-shadow: 0 0 0 1px var(--gold), 0 0 60px 10px rgba(243, 192, 99, 0.55);
-    animation: core-pulse 5s ease-in-out infinite;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
 }
-@keyframes core-pulse { 50% { box-shadow: 0 0 0 1px var(--glow), 0 0 90px 18px rgba(243, 192, 99, 0.7); } }
 /* Rayons de lumière du cœur vers chaque compétence */
 .theme-fondation .radiant-nodes::after {
     content: "";
@@ -341,7 +323,7 @@
 @media (max-width: 760px) {
     .theme-fondation .radiant { width: 100%; aspect-ratio: auto; padding-top: 250px; }
     .theme-fondation .radiant-sphere { inset: 0 auto auto 50%; width: 220px; height: 220px; margin-left: -110px; }
-    .theme-fondation .radiant-core { top: 110px; }
+    .theme-fondation .radiant .radiant-core { top: 110px; }
     .theme-fondation .radiant-nodes::after { display: none; }
     .theme-fondation .radiant-nodes { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; }
     .theme-fondation .radiant-nodes li { position: static; width: auto; margin: 0; transform: none; }
@@ -388,6 +370,7 @@
     perspective: 1000px;
 }
 .radiant-intro.active { animation: intro-out var(--out-dur, 0.9s) ease-in var(--out-at, 11.1s) forwards; }
+.radiant-intro .radiant-core { cursor: pointer; pointer-events: auto; }
 .radiant-intro .stage {
     position: relative;
     width: min(70vmin, 560px);
@@ -399,8 +382,6 @@
 .radiant-intro .ring { opacity: 0; transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) scale(0.05); }
 .radiant-intro.active .ring { animation: ring-open var(--ring-dur, 3.2s) cubic-bezier(0.2, 0.9, 0.2, 1) forwards; animation-delay: var(--delay, 2.4s); }
 /* En attente : le Radiant est éteint, il respire à peine */
-.radiant-intro .radiant-core { cursor: pointer; box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.5), 0 0 24px rgba(243, 192, 99, 0.25); animation: core-sleep 3s ease-in-out infinite; }
-.radiant-intro.active .radiant-core { animation: core-wake var(--wake, 2s) ease-out forwards, core-pulse 5s ease-in-out var(--wake, 2s) infinite; }
 /* Version courte, à chaque changement de page : pas d'écran d'attente, ni de titre animé */
 .radiant-intro.short .gate,
 .radiant-intro.short .skip { display: none; }
@@ -511,7 +492,7 @@
     .radiant-intro { display: none; }
 }
 @media print {
-    .fondation-scene, .radiant-intro, .radiant-sphere, .radiant-core, .theme-fondation .hero::after { display: none; }
+    .fondation-scene, .radiant-intro, .radiant-sphere, .radiant-core, .theme-fondation .hero .hero-radiant { display: none; }
     .theme-fondation { background: #fff; }
     .theme-fondation .site-header { position: static; }
     .fx .fx-item, .fx .radiant-nodes li { opacity: 1 !important; transform: none !important; filter: none !important; }
