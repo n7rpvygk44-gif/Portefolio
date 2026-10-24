@@ -85,6 +85,15 @@
         return lines;
     })();
 
+    // Orbites des électrons autour du cœur : rayon (en fraction du Radiant), inclinaison,
+    // orientation, vitesse, nombre d'électrons.
+    const ORBITS = [
+        { r: 0.58, tilt: 1.25, spin: 0, speed: 1.6, count: 2, phase: 0, precess: 0.05 },
+        { r: 0.62, tilt: 1.25, spin: 2.09, speed: -1.3, count: 2, phase: 1.2, precess: -0.04 },
+        { r: 0.66, tilt: 1.25, spin: 4.19, speed: 1.1, count: 2, phase: 2.4, precess: 0.03 },
+        { r: 0.4, tilt: 0.2, spin: 0.8, speed: 2.2, count: 1, phase: 0.5, precess: 0.06 },
+    ];
+
     // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
     // speed (rotation), static (une seule image).
     function radiantPrime(options) {
@@ -197,6 +206,87 @@
             }
             c.globalAlpha = 1;
 
+            // Électrons : comme autour du noyau d'un atome, des particules lumineuses gravitent
+            // autour du cœur sur des orbites inclinées. Celles qui passent derrière sont dessinées
+            // avant le cœur, plus pâles ; celles de devant après.
+            const electrons = [];
+            const orbitLines = [];
+            ORBITS.forEach((o) => {
+                const tilt = o.tilt + time * o.precess;
+                const ct = Math.cos(tilt), st = Math.sin(tilt), cs = Math.cos(o.spin), ss = Math.sin(o.spin);
+                const place = (ang) => {
+                    // Cercle dans son plan, incliné (tilt) puis tourné (spin) dans l'espace.
+                    const x0 = Math.cos(ang) * o.r, y0 = Math.sin(ang) * o.r;
+                    const y1 = y0 * ct, z1 = y0 * st;
+                    const x2 = x0 * cs - z1 * ss, z2 = x0 * ss + z1 * cs;
+                    const k = 3.2 / (3.2 + z2);
+                    return [cx + x2 * R * k, cy - y1 * R * k, z2];
+                };
+                const path = [];
+                for (let i = 0; i <= 48; i++) {
+                    path.push(place((i / 48) * 6.283));
+                }
+                orbitLines.push(path);
+                for (let e = 0; e < o.count; e++) {
+                    const ang = o.phase + e * (6.283 / o.count) + time * o.speed;
+                    const trail = [];
+                    for (let t = 0; t < 6; t++) {
+                        trail.push(place(ang - t * 0.09 * Math.sign(o.speed)));
+                    }
+                    electrons.push(trail);
+                }
+            });
+            const drawOrbits = () => {
+                // Orbites argentées, pour se détacher du treillis doré.
+                c.strokeStyle = 'rgba(120, 128, 145, ' + (0.8 * (0.4 + 0.6 * glow)).toFixed(3) + ')';
+                c.lineWidth = Math.max(0.6, w / 380);
+                c.beginPath();
+                orbitLines.forEach((path) => path.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))));
+                c.stroke();
+            };
+            const drawElectrons = (front) => {
+                const es = Math.max(2.5, w / 42);
+                electrons.forEach((trail) => {
+                    if ((trail[0][2] < 0) !== front) {
+                        return;
+                    }
+                    const dim = front ? 1 : 0.45;
+                    for (let t = trail.length - 1; t > 0; t--) {
+                        c.globalAlpha = dim * (1 - t / trail.length) * 0.6;
+                        c.fillStyle = '#b8862c';
+                        c.beginPath();
+                        c.arc(trail[t][0], trail[t][1], es * (0.5 - t * 0.05), 0, 6.283);
+                        c.fill();
+                    }
+                    const [x, y] = trail[0];
+                    const halo = c.createRadialGradient(x, y, 0, x, y, es * 2.2);
+                    halo.addColorStop(0, 'rgba(255, 250, 230, ' + dim + ')');
+                    halo.addColorStop(0.35, 'rgba(255, 214, 130, ' + (0.7 * dim) + ')');
+                    halo.addColorStop(1, 'rgba(255, 200, 110, 0)');
+                    c.globalAlpha = 1;
+                    c.fillStyle = halo;
+                    c.fillRect(x - es * 2.2, y - es * 2.2, es * 4.4, es * 4.4);
+                    // Noyau de l'électron : point doré cerclé de blanc, lisible sur l'ivoire.
+                    c.globalAlpha = dim;
+                    c.fillStyle = '#8a6420';
+                    c.beginPath();
+                    c.arc(x, y, es * 0.5, 0, 6.283);
+                    c.fill();
+                    c.fillStyle = '#e9b24a';
+                    c.beginPath();
+                    c.arc(x, y, es * 0.4, 0, 6.283);
+                    c.fill();
+                    c.fillStyle = '#fffaf0';
+                    c.beginPath();
+                    c.arc(x, y, es * 0.22, 0, 6.283);
+                    c.fill();
+                    c.globalAlpha = 1;
+                });
+                c.globalAlpha = 1;
+            };
+            drawOrbits();
+            drawElectrons(false);
+
             // Cœur : un petit cristal blanc éblouissant, entouré d'une aura dorée.
             if (glow > 0.02) {
                 const aura = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.55);
@@ -230,6 +320,7 @@
                     c.stroke();
                 }
             }
+            drawElectrons(true);
         }
 
         function loop(now) {
@@ -667,6 +758,244 @@
     }
 
     // ----- Décor : Trantor -----
+    // Planète-ville vue depuis l'espace, dessinée à la main sur canvas (création originale) :
+    // face nocturne constellée des lumières de la ville, croissant éclairé et halo d'atmosphère
+    // bleutés, et grands anneaux orbitaux métalliques qui passent devant et derrière la planète.
+    function trantorPlanet(holder) {
+        const canvas = document.createElement('canvas');
+        canvas.className = 'trantor-canvas';
+        const c = canvas.getContext('2d');
+        holder.appendChild(canvas);
+        let w = 0, dpr = 1;
+        // Lumières de la ville et quartiers : semés une fois, en coordonnées du disque (-1..1).
+        const lights = [];
+        for (let i = 0; i < 1400; i++) {
+            // Les lumières suivent un quadrillage irrégulier, comme des avenues.
+            const gx = Math.round((Math.random() * 2 - 1) * 26) / 26 + (Math.random() - 0.5) * 0.02;
+            const gy = (Math.random() * 2 - 1);
+            const pick = Math.random() < 0.5 ? [gx, gy] : [gy, gx];
+            if (pick[0] * pick[0] + pick[1] * pick[1] < 0.97) {
+                lights.push({ x: pick[0], y: pick[1], a: 0.25 + Math.random() * 0.75, tw: Math.random() * 6.28 });
+            }
+        }
+        const districts = [];
+        for (let i = 0; i < 70; i++) {
+            const a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * 0.9;
+            districts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, s: 0.05 + Math.random() * 0.14, warm: Math.random() < 0.6 });
+        }
+        const stars = [];
+        for (let i = 0; i < 120; i++) {
+            stars.push({ x: Math.random(), y: Math.random(), a: 0.2 + Math.random() * 0.7, s: Math.random() < 0.1 ? 1.4 : 0.8 });
+        }
+        // Anneaux : rayons (en fraction du rayon de la planète), aplatissement, inclinaison, nombre de voies.
+        const RINGS = [
+            { rx: 1.75, ry: 0.32, rot: -0.32, lanes: 5, gap: 0.035, speed: 0.04 },
+            { rx: 1.55, ry: 0.62, rot: 0.42, lanes: 4, gap: 0.03, speed: -0.03 },
+            { rx: 2.1, ry: 0.18, rot: 0.08, lanes: 3, gap: 0.04, speed: 0.02 },
+        ];
+        function resize() {
+            const r = holder.getBoundingClientRect();
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            w = Math.max(10, Math.round(r.width));
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(w * dpr);
+        }
+        function ringArc(ring, P, from, to, t) {
+            // Un anneau = une immense structure d'acier, découpée en segments par des nervures.
+            // Chaque segment prend la lumière selon sa position face à l'étoile (en haut à droite) :
+            // presque noir à l'ombre, reflets cuivrés côté éclairé, comme dans la série.
+            const band = ring.lanes * ring.gap;
+            const steps = 120;
+            const cr = Math.cos(ring.rot), sr = Math.sin(ring.rot);
+            const at = (ang, k) => [Math.cos(ang) * ring.rx * P * k, Math.sin(ang) * ring.ry * P * k];
+            const light = (ang) => {
+                const [x, y] = at(ang, 1);
+                const sx = x * cr - y * sr, sy = x * sr + y * cr;
+                return Math.min(1, Math.max(0, 0.5 + (sx * 0.75 - sy * 0.65) / (ring.rx * P * 1.6)));
+            };
+            c.lineCap = 'butt';
+            for (let i = 0; i < steps; i++) {
+                const a0 = from + (to - from) * i / steps, a1 = from + (to - from) * (i + 1.05) / steps;
+                const lf = light((a0 + a1) / 2);
+                const rib = i % 6 === 0;
+                // Corps du segment : acier sombre, éclairci et réchauffé côté lumière.
+                const r = Math.round(14 + 70 * lf * lf), g = Math.round(18 + 50 * lf * lf), b = Math.round(26 + 40 * lf * lf);
+                c.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                c.lineWidth = Math.max(2, band * P * 0.95);
+                c.beginPath();
+                c.ellipse(0, 0, ring.rx * P * (1 + band / 2), ring.ry * P * (1 + band / 2), 0, a0, a1);
+                c.stroke();
+                // Voies intérieures : fines rainures plus sombres.
+                for (let l = 1; l < ring.lanes; l++) {
+                    const k = 1 + l * ring.gap;
+                    c.strokeStyle = 'rgba(0, 0, 0, ' + (0.35 + 0.2 * lf).toFixed(2) + ')';
+                    c.lineWidth = Math.max(0.5, w / 700);
+                    c.beginPath();
+                    c.ellipse(0, 0, ring.rx * P * k, ring.ry * P * k, 0, a0, a1);
+                    c.stroke();
+                }
+                // Arêtes : liseré cuivré qui s'allume seulement là où la lumière frappe.
+                const edge = Math.pow(lf, 2.2);
+                [0, ring.lanes].forEach((l, n) => {
+                    const k = 1 + l * ring.gap;
+                    c.strokeStyle = 'rgba(' + Math.round(150 + 105 * edge) + ',' + Math.round(95 + 95 * edge) + ',' + Math.round(70 + 80 * edge) + ',' + (0.15 + 0.85 * edge * (n ? 1 : 0.7)).toFixed(3) + ')';
+                    c.lineWidth = Math.max(0.7, w / 420);
+                    c.beginPath();
+                    c.ellipse(0, 0, ring.rx * P * k, ring.ry * P * k, 0, a0, a1);
+                    c.stroke();
+                });
+                // Nervures transversales qui donnent l'échelle de la structure.
+                if (rib) {
+                    const p0 = at(a0, 1), p1 = at(a0, 1 + band);
+                    c.strokeStyle = 'rgba(' + Math.round(60 + 160 * edge) + ',' + Math.round(50 + 110 * edge) + ',' + Math.round(45 + 80 * edge) + ',0.6)';
+                    c.lineWidth = Math.max(0.5, w / 800);
+                    c.beginPath();
+                    c.moveTo(p0[0], p0[1]);
+                    c.lineTo(p1[0], p1[1]);
+                    c.stroke();
+                }
+            }
+            // Navettes qui circulent le long de l'anneau.
+            for (let n = 0; n < 4; n++) {
+                const ang = from + ((n / 4 + t * ring.speed) % 1 + 1) % 1 * (to - from);
+                const [x, y] = at(ang, 1 + band * 0.5);
+                c.fillStyle = 'rgba(210, 230, 255, 0.85)';
+                c.fillRect(x - 0.7, y - 0.7, 1.4, 1.4);
+            }
+        }
+        function draw(t) {
+            const cx = w * 0.47, cy = w * 0.53, P = w * 0.34;
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            // Ciel : noir bleuté, étoiles.
+            const sky = c.createRadialGradient(cx * 1.3, cy * 0.6, 0, cx, cy, w * 0.75);
+            sky.addColorStop(0, '#16233a');
+            sky.addColorStop(1, '#03050a');
+            c.fillStyle = sky;
+            c.fillRect(0, 0, w, w);
+            stars.forEach((s) => {
+                c.fillStyle = 'rgba(220, 230, 255, ' + s.a + ')';
+                c.fillRect(s.x * w, s.y * w, s.s, s.s);
+            });
+            // Moitiés arrière des anneaux.
+            RINGS.forEach((ring) => {
+                c.save();
+                c.translate(cx, cy);
+                c.rotate(ring.rot);
+                ringArc(ring, P, Math.PI, Math.PI * 2, t);
+                c.restore();
+            });
+            // La lumière de l'étoile vient d'en haut à droite.
+            const lx = cx + P * 0.55, ly = cy - P * 0.5;
+            // Disque de la planète.
+            c.save();
+            c.beginPath();
+            c.arc(cx, cy, P, 0, 6.283);
+            c.clip();
+            const body = c.createRadialGradient(cx - P * 0.3, cy + P * 0.3, 0, cx, cy, P);
+            body.addColorStop(0, '#0a0f1a');
+            body.addColorStop(0.8, '#101a2c');
+            body.addColorStop(1, '#1b2c46');
+            c.fillStyle = body;
+            c.fillRect(cx - P, cy - P, P * 2, P * 2);
+            // Quartiers : nappes sombres et plaques plus claires de la ville-planète.
+            districts.forEach((d) => {
+                const g = c.createRadialGradient(cx + d.x * P, cy + d.y * P, 0, cx + d.x * P, cy + d.y * P, d.s * P);
+                g.addColorStop(0, d.warm ? 'rgba(120, 95, 60, 0.35)' : 'rgba(70, 95, 130, 0.35)');
+                g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                c.fillStyle = g;
+                c.fillRect(cx + (d.x - d.s) * P, cy + (d.y - d.s) * P, d.s * 2 * P, d.s * 2 * P);
+            });
+            // Face éclairée : surface gris-bleu lumineuse côté étoile.
+            const lit = c.createRadialGradient(lx + P * 0.2, ly - P * 0.2, 0, lx, ly, P * 1.5);
+            lit.addColorStop(0, 'rgba(205, 225, 250, 0.9)');
+            lit.addColorStop(0.3, 'rgba(130, 160, 200, 0.6)');
+            lit.addColorStop(0.6, 'rgba(50, 70, 105, 0.25)');
+            lit.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            c.fillStyle = lit;
+            c.fillRect(cx - P, cy - P, P * 2, P * 2);
+            // Terminateur : la nuit couvre le reste du disque, avec un bord adouci.
+            const night = c.createRadialGradient(cx - P * 0.42, cy + P * 0.38, 0, cx - P * 0.42, cy + P * 0.38, P * 1.45);
+            night.addColorStop(0, 'rgba(3, 6, 12, 0.92)');
+            night.addColorStop(0.62, 'rgba(3, 6, 12, 0.85)');
+            night.addColorStop(0.8, 'rgba(3, 6, 12, 0.3)');
+            night.addColorStop(1, 'rgba(3, 6, 12, 0)');
+            c.fillStyle = night;
+            c.fillRect(cx - P, cy - P, P * 2, P * 2);
+            // Lumières de la ville sur la face nocturne, par-dessus l'ombre.
+            lights.forEach((p) => {
+                const dark = Math.min(1, Math.max(0, 0.55 - (p.x * 0.6 - p.y * 0.55)));
+                const tw = 0.75 + 0.25 * Math.sin(t * 1.5 + p.tw);
+                c.fillStyle = 'rgba(255, 196, 110, ' + (p.a * dark * tw).toFixed(3) + ')';
+                c.fillRect(cx + p.x * P, cy + p.y * P, 1, 1);
+                // Côté jour, la même trame urbaine apparaît en gris acier.
+                if (dark < 0.4) {
+                    c.fillStyle = 'rgba(190, 205, 225, ' + (p.a * (0.4 - dark) * 0.6).toFixed(3) + ')';
+                    c.fillRect(cx + p.x * P, cy + p.y * P, 1.4, 1.4);
+                }
+            });
+            c.restore();
+            // Atmosphère : liseré bleu continu, intense face à l'étoile et qui s'éteint vers la nuit.
+            // Un dégradé conique donne un liseré continu, sans raccord.
+            const rim = (alpha) => {
+                if (!c.createConicGradient) {
+                    return 'rgba(' + alpha[0] + ', 0.6)';
+                }
+                const g = c.createConicGradient(-0.75 - Math.PI, cx, cy);
+                g.addColorStop(0, 'rgba(' + alpha[0] + ', 0)');
+                g.addColorStop(0.3, 'rgba(' + alpha[0] + ', 0)');
+                g.addColorStop(0.5, 'rgba(' + alpha[0] + ', ' + alpha[1] + ')');
+                g.addColorStop(0.7, 'rgba(' + alpha[0] + ', 0)');
+                g.addColorStop(1, 'rgba(' + alpha[0] + ', 0)');
+                return g;
+            };
+            c.save();
+            c.filter = 'blur(' + Math.max(2, w / 70).toFixed(1) + 'px)';
+            c.strokeStyle = rim(['100, 160, 255', 0.7]);
+            c.lineWidth = w / 28;
+            c.beginPath();
+            c.arc(cx, cy, P * 1.01, 0, 6.283);
+            c.stroke();
+            c.filter = 'none';
+            c.strokeStyle = rim(['215, 235, 255', 1]);
+            c.lineWidth = Math.max(1, w / 220);
+            c.beginPath();
+            c.arc(cx, cy, P, 0, 6.283);
+            c.stroke();
+            c.restore();
+            // Moitiés avant des anneaux, par-dessus la planète.
+            RINGS.forEach((ring) => {
+                c.save();
+                c.translate(cx, cy);
+                c.rotate(ring.rot);
+                ringArc(ring, P, 0, Math.PI, t);
+                c.restore();
+            });
+            // Éclat de l'étoile, en haut à droite.
+            const sun = c.createRadialGradient(w * 0.86, w * 0.12, 0, w * 0.86, w * 0.12, w * 0.14);
+            sun.addColorStop(0, 'rgba(235, 245, 255, 0.95)');
+            sun.addColorStop(0.15, 'rgba(170, 205, 255, 0.5)');
+            sun.addColorStop(1, 'rgba(120, 170, 255, 0)');
+            c.fillStyle = sun;
+            c.fillRect(0, 0, w, w);
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); draw(performance.now() / 1000); });
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || root.classList.contains('a11y-motion');
+        if (still) {
+            draw(0);
+        } else {
+            let last = 0;
+            const loop = (now) => {
+                // Mouvement lent : une image toutes les 50 ms suffit et ménage la batterie.
+                if (now - last > 50) {
+                    last = now;
+                    draw(now / 1000);
+                }
+                requestAnimationFrame(loop);
+            };
+            requestAnimationFrame(loop);
+        }
+    }
     const scene = document.createElement('div');
     scene.className = 'fondation-scene';
     scene.setAttribute('aria-hidden', 'true');
@@ -674,11 +1003,6 @@
     trantor.className = 'trantor';
     const crop = document.createElement('div');
     crop.className = 'planet-crop';
-    const img = document.createElement('img');
-    img.src = imgDir + 'trantor.svg';
-    img.alt = '';
-    img.decoding = 'async';
-    crop.appendChild(img);
     const orbit = document.createElement('div');
     orbit.className = 'orbit';
     const tag = document.createElement('span');
@@ -687,6 +1011,7 @@
     trantor.append(orbit, crop, tag);
     scene.appendChild(trantor);
     document.body.prepend(scene);
+    trantorPlanet(crop);
 
     // ----- Anneaux d'équations (SVG) -----
     // Équations de « psychohistoire » inventées pour le décor.
