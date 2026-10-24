@@ -277,97 +277,181 @@
     }
 
 
-    // ----- Ouverture du Radiant : jaillissement de particules qui forment une galaxie -----
-    // Les particules (or, argent, bleu, rouge, vert, violet) sortent du cœur en spirale,
-    // s'organisent en galaxie à bras spiraux entourée d'une sphère de poussière lumineuse,
-    // tournent comme une vraie galaxie (plus vite au centre), puis envahissent la pièce.
-    // Les étapes sont exprimées en fraction de la durée de l'introduction.
-    function radiantGalaxy(total) {
-        const canvas = document.createElement('canvas');
-        canvas.className = 'radiant-galaxy';
-        canvas.setAttribute('aria-hidden', 'true');
-        const c = canvas.getContext('2d');
-        const small = window.innerWidth < 760;
-        const count = small ? 2400 : 6500;
-        const palette = [
-            // Teintes soutenues pour rester visibles sur l'ivoire de la pièce.
-            [200, 140, 30, 0.34],    // or
-            [120, 132, 152, 0.26],   // argent
-            [50, 110, 200, 0.12],    // bleu
-            [205, 55, 60, 0.09],     // rouge
-            [30, 150, 95, 0.09],     // vert
-            [130, 70, 205, 0.10],    // violet
-        ];
-        const pick = () => {
-            let r = Math.random();
-            for (const col of palette) {
-                if ((r -= col[3]) <= 0) {
-                    return col;
+    // ----- Poussière du Radiant -----
+    // Teintes soutenues pour rester visibles sur l'ivoire de la pièce. L'or et l'argent dominent ;
+    // le bleu, le rouge, le vert, le violet et l'orange restent des touches discrètes.
+    const DUST = [
+        [200, 140, 30, 0.38],    // or
+        [120, 132, 152, 0.30],   // argent
+        [50, 110, 200, 0.10],    // bleu
+        [205, 55, 60, 0.055],    // rouge
+        [30, 150, 95, 0.055],    // vert
+        [130, 70, 205, 0.055],   // violet
+        [232, 120, 25, 0.055],   // orange
+    ];
+    function dustColour() {
+        let r = Math.random();
+        for (const col of DUST) {
+            if ((r -= col[3]) <= 0) {
+                return col;
+            }
+        }
+        return DUST[0];
+    }
+    const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+    const mix = (a, b, f) => a + (b - a) * f;
+
+    // Points de la page visible : les lignes de texte (dans leur couleur) et le contour des panneaux (en or).
+    // Ils servent à dissoudre la page en particules, ou à la recomposer à partir d'elles.
+    function samplePage(count) {
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const zones = [];
+        const range = document.createRange();
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: (node) => (node.textContent.trim() && !node.parentElement.closest('.radiant-intro, .fondation-scene, script, style, .sound-toggle, .skip-link')
+                ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+        });
+        while (walker.nextNode()) {
+            range.selectNodeContents(walker.currentNode);
+            const rgb = (getComputedStyle(walker.currentNode.parentElement).color.match(/\d+/g) || [21, 25, 37]).slice(0, 3).map(Number);
+            for (const r of range.getClientRects()) {
+                if (r.width > 2 && r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw) {
+                    zones.push({ x: r.left, y: r.top + r.height * 0.2, w: r.width, h: r.height * 0.6, col: rgb, weight: r.width * r.height * 0.6 });
                 }
             }
-            return palette[0];
+        }
+        document.querySelectorAll('.card, .competence, .hero, .facts, .radiant-nodes a, .button, .header-inner').forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.width > 2 && r.bottom > 0 && r.top < vh) {
+                zones.push({ x: r.left, y: r.top, w: r.width, h: r.height, edge: true, col: [200, 149, 47], weight: (r.width + r.height) * 6 });
+            }
+        });
+        if (!zones.length) {
+            return [];
+        }
+        let total = 0;
+        const cumul = zones.map((z) => (total += z.weight));
+        const points = [];
+        for (let i = 0; i < count; i++) {
+            const pick = Math.random() * total;
+            let lo = 0, hi = cumul.length - 1;
+            while (lo < hi) {
+                const mid = (lo + hi) >> 1;
+                if (cumul[mid] < pick) { lo = mid + 1; } else { hi = mid; }
+            }
+            const z = zones[lo];
+            let x = z.x + Math.random() * z.w, y = z.y + Math.random() * z.h;
+            if (z.edge) {
+                // Un point sur le contour du panneau.
+                const side = Math.random() * (z.w + z.h) * 2;
+                if (side < z.w) { y = z.y; } else if (side < z.w * 2) { y = z.y + z.h; } else { x = Math.random() < 0.5 ? z.x : z.x + z.w; }
+            }
+            points.push({ x, y, col: z.col });
+        }
+        return points;
+    }
+
+    function dustCanvas(className) {
+        const canvas = document.createElement('canvas');
+        canvas.className = className;
+        canvas.setAttribute('aria-hidden', 'true');
+        const state = { canvas, c: canvas.getContext('2d'), w: 0, h: 0, dpr: 1 };
+        state.resize = () => {
+            state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+            state.w = window.innerWidth;
+            state.h = window.innerHeight;
+            canvas.width = Math.round(state.w * state.dpr);
+            canvas.height = Math.round(state.h * state.dpr);
         };
+        state.resize();
+        return state;
+    }
+    function dot(c, x, y, size, col, alpha) {
+        c.fillStyle = 'rgba(' + Math.round(col[0]) + ',' + Math.round(col[1]) + ',' + Math.round(col[2]) + ',' + alpha.toFixed(3) + ')';
+        if (size > 2) {
+            // Étoiles brillantes : un point rond entouré d'un halo doux.
+            c.beginPath();
+            c.arc(x, y, size * 0.45, 0, 6.283);
+            c.fill();
+            c.globalAlpha = 0.2;
+            c.beginPath();
+            c.arc(x, y, size * 1.3, 0, 6.283);
+            c.fill();
+            c.globalAlpha = 1;
+        } else {
+            c.fillRect(x - size / 2, y - size / 2, size, size);
+        }
+    }
+
+    // ----- Ouverture du Radiant : jaillissement de particules qui forment une galaxie -----
+    // Introduction complète : les particules sortent du cœur en spirale, s'organisent en galaxie
+    // aérée à bras spiraux entourée d'une sphère de poussière, tournent comme une vraie galaxie
+    // (plus vite au centre), puis envahissent la pièce.
+    // Changement de page (arrive) : la page quittée revient en poussière depuis le cœur, forme la
+    // galaxie, puis les particules vont se poser sur les textes et panneaux de la nouvelle page.
+    // Les étapes sont exprimées en fraction de la durée de l'introduction.
+    function radiantGalaxy(total, arrive) {
+        const s = dustCanvas('radiant-galaxy' + (arrive ? ' free' : ''));
+        const { canvas, c } = s;
+        const small = window.innerWidth < 760;
+        const count = small ? 1500 : 3800;
         const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
         const parts = [];
         for (let i = 0; i < count; i++) {
             const kind = Math.random();
-            const p = { col: pick(), size: Math.random() < 0.1 ? 2.6 : 0.9 + Math.random() * 1.4, tw: Math.random() * 6.28 };
-            if (kind < 0.62) {
-                // Bras spiraux (galaxie à 3 bras), disque fin.
+            const p = { col: dustColour(), size: Math.random() < 0.08 ? 2.6 : 0.8 + Math.random() * 1.2, tw: Math.random() * 6.28 };
+            if (kind < 0.66) {
+                // Bras spiraux (galaxie à 3 bras), larges et espacés.
                 const arm = Math.floor(Math.random() * 3);
-                const r = Math.pow(Math.random(), 0.7);
-                p.r = 0.08 + r * 0.92;
-                p.a = arm * 2.094 + p.r * 4.2 + gauss() * 0.35;
-                p.y = gauss() * 0.05 * (1.2 - p.r);
-            } else if (kind < 0.8) {
-                // Bulbe central.
-                p.r = Math.abs(gauss()) * 0.22;
-                p.a = Math.random() * 6.28;
+                p.r = 0.1 + Math.random() * 0.95;
+                p.a = arm * 2.094 + p.r * 3.8 + gauss() * 0.5;
                 p.y = gauss() * 0.12;
-            } else {
-                // Sphère de poussière qui enveloppe la galaxie.
-                const u = Math.random() * 2 - 1;
-                p.sphere = true;
-                p.r = Math.sqrt(1 - u * u) * 1.15;
+            } else if (kind < 0.78) {
+                // Bulbe central, peu dense.
+                p.r = 0.04 + Math.abs(gauss()) * 0.3;
                 p.a = Math.random() * 6.28;
-                p.y = u * 1.15;
+                p.y = gauss() * 0.16;
+            } else {
+                // Sphère de poussière, épaisse et clairsemée, qui enveloppe la galaxie.
+                const u = Math.random() * 2 - 1;
+                const shell = 0.95 + Math.random() * 0.55;
+                p.sphere = true;
+                p.r = Math.sqrt(1 - u * u) * shell;
+                p.a = Math.random() * 6.28;
+                p.y = u * shell;
             }
-            p.emit = 0.17 + Math.random() * 0.2;     // moment où la particule jaillit
-            p.flight = 0.12 + Math.random() * 0.1;   // durée du vol jusqu'à sa place
+            p.emit = arrive ? Math.random() * 0.1 : 0.17 + Math.random() * 0.2;   // moment où la particule jaillit
+            p.flight = arrive ? 0.14 + Math.random() * 0.1 : 0.12 + Math.random() * 0.1;
             p.swirl = 2.5 + Math.random() * 2.5;     // tours de spirale pendant le vol
+            p.land = 0.45 + Math.random() * 0.12;    // (arrivée) départ vers la page
             parts.push(p);
         }
+        let targets = null;
 
-        let w = 0, h = 0, dpr = 1;
-        function resize() {
-            dpr = Math.min(window.devicePixelRatio || 1, 2);
-            w = window.innerWidth;
-            h = window.innerHeight;
-            canvas.width = Math.round(w * dpr);
-            canvas.height = Math.round(h * dpr);
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
+        window.addEventListener('resize', s.resize);
         let t0 = 0;
         let frame = 0;
-        const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
         function draw(now) {
             if (!t0) {
                 t0 = now;
             }
+            const { w, h, dpr } = s;
             const sec = (now - t0) / 1000;
             const k = sec / total;                       // avancement 0..1
+            if (arrive && !targets && k > 0.4) {
+                const points = samplePage(Math.round(count * 0.75));
+                targets = parts.map((p, i) => points[i] || null);
+            }
             c.setTransform(dpr, 0, 0, dpr, 0, 0);
             c.clearRect(0, 0, w, h);
             const cx = w / 2, cy = h / 2;
-            // Taille de la galaxie : elle grandit puis envahit la pièce à la fin.
             const base = Math.min(w, h) * 0.42;
-            const R = base * (1 + 2.2 * ease((k - 0.72) / 0.2));
+            // Taille de la galaxie : elle grandit puis envahit la pièce à la fin de l'introduction complète.
+            const R = base * (arrive ? 1 : 1 + 2.2 * ease((k - 0.72) / 0.2));
             const tilt = 1.05 - 0.35 * ease((k - 0.4) / 0.4);      // le disque se redresse
             const yaw = sec * 0.12;
             const ct = Math.cos(tilt), st = Math.sin(tilt);
-            const fadeOut = 1 - ease((k - 0.86) / 0.08);
+            const fadeOut = arrive ? 1 - ease((k - 0.8) / 0.2) : 1 - ease((k - 0.86) / 0.08);
             for (let i = 0; i < parts.length; i++) {
                 const p = parts[i];
                 const life = (k - p.emit) / p.flight;
@@ -385,31 +469,32 @@
                 const y = lift * ct - z0 * st;
                 const z = lift * st + z0 * ct;
                 const persp = 2.4 / (2.4 + z);
-                const px = cx + x * R * persp;
-                const py = cy - y * R * persp;
+                let px = cx + x * R * persp;
+                let py = cy - y * R * persp;
+                let col = p.col;
+                let size = p.size * persp * (arrive ? 1.3 : 1 + 1.5 * ease((k - 0.72) / 0.2));
+                let fade = fadeOut;
+                if (arrive) {
+                    // Les particules vont se poser sur la nouvelle page et prennent sa couleur.
+                    const target = targets && targets[i];
+                    const m = ease((k - p.land) / 0.25);
+                    if (target) {
+                        px = mix(px, target.x, m);
+                        py = mix(py, target.y, m);
+                        col = [mix(col[0], target.col[0], m), mix(col[1], target.col[1], m), mix(col[2], target.col[2], m)];
+                        size = mix(size, 1.4, m);
+                    } else {
+                        fade *= 1 - m;
+                    }
+                }
                 if (px < -10 || py < -10 || px > w + 10 || py > h + 10) {
                     continue;
                 }
                 const twinkle = 0.6 + 0.4 * Math.sin(sec * 3 + p.tw);
-                const alpha = Math.min(1, life * 2) * twinkle * fadeOut * (0.6 + 0.4 * persp);
-                const size = p.size * persp * (1 + 1.5 * ease((k - 0.72) / 0.2));
-                c.fillStyle = 'rgba(' + p.col[0] + ',' + p.col[1] + ',' + p.col[2] + ',' + alpha.toFixed(3) + ')';
-                if (p.size > 2) {
-                    // Étoiles brillantes : un point rond entouré d'un halo doux.
-                    c.beginPath();
-                    c.arc(px, py, size * 0.45, 0, 6.283);
-                    c.fill();
-                    c.globalAlpha = 0.2;
-                    c.beginPath();
-                    c.arc(px, py, size * 1.3, 0, 6.283);
-                    c.fill();
-                    c.globalAlpha = 1;
-                } else {
-                    c.fillRect(px - size / 2, py - size / 2, size, size);
-                }
+                dot(c, px, py, size, col, Math.min(1, life * 2) * twinkle * fade * (0.6 + 0.4 * persp));
             }
             // Lueur du noyau galactique.
-            const glow = ease((k - 0.2) / 0.2) * fadeOut;
+            const glow = (arrive ? 1 - ease((k - 0.4) / 0.3) : ease((k - 0.2) / 0.2)) * fadeOut;
             if (glow > 0) {
                 const g = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.35);
                 g.addColorStop(0, 'rgba(255, 214, 140, ' + (0.55 * glow) + ')');
@@ -424,8 +509,64 @@
         return {
             canvas,
             start() { frame = requestAnimationFrame(draw); },
-            stop() { cancelAnimationFrame(frame); window.removeEventListener('resize', resize); },
+            stop() { cancelAnimationFrame(frame); window.removeEventListener('resize', s.resize); canvas.remove(); },
         };
+    }
+
+    // ----- Départ vers une autre page : la page se dissout en poussière que le Radiant absorbe -----
+    function dissolvePage(href) {
+        const s = dustCanvas('page-dust');
+        const { c, w, h, dpr } = s;
+        const points = samplePage(window.innerWidth < 760 ? 1800 : 4200);
+        const cx = w / 2, cy = h / 2;
+        // 0 à 0,3 s : la page se change en poussière sur place ; ensuite la poussière tourbillonne vers le cœur.
+        const hold = 0.3;
+        const duration = 1.5;
+        const parts = points.map((pt) => {
+            const dx = pt.x - cx, dy = pt.y - cy;
+            return {
+                r: Math.hypot(dx, dy), a: Math.atan2(dy, dx), from: pt.col, to: dustColour(),
+                delay: Math.random() * 0.25, swirl: (1.2 + Math.random() * 2) * (Math.random() < 0.5 ? -1 : 1),
+                size: Math.random() < 0.06 ? 2.6 : 1 + Math.random() * 1.2, tw: Math.random() * 6.28,
+            };
+        });
+        document.body.appendChild(s.canvas);
+        root.classList.add('leaving');
+        let t0 = 0;
+        function draw(now) {
+            if (!t0) {
+                t0 = now;
+            }
+            const sec = (now - t0) / 1000;
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            c.clearRect(0, 0, w, h);
+            for (const p of parts) {
+                const m = Math.max(0, Math.min(1, (sec - hold - p.delay) / (duration - hold - 0.35)));
+                const pull = m * m * (3 - 2 * m);
+                // Spirale vers le cœur du Radiant, au centre de l'écran.
+                const rad = p.r * (1 - pull);
+                const ang = p.a + p.swirl * pull;
+                const colour = [mix(p.from[0], p.to[0], ease(m * 1.6)), mix(p.from[1], p.to[1], ease(m * 1.6)), mix(p.from[2], p.to[2], ease(m * 1.6))];
+                const twinkle = 0.7 + 0.3 * Math.sin(sec * 8 + p.tw);
+                dot(c, cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad, mix(1.3, p.size, ease(m * 2)), colour, ease(sec / 0.2) * twinkle * (1 - 0.6 * ease((m - 0.85) / 0.15)));
+            }
+            const glow = ease((sec - 0.8) / 0.6);
+            if (glow > 0) {
+                const g = c.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.18);
+                g.addColorStop(0, 'rgba(255, 214, 140, ' + (0.7 * glow) + ')');
+                g.addColorStop(1, 'rgba(255, 214, 140, 0)');
+                c.fillStyle = g;
+                c.fillRect(0, 0, w, h);
+            }
+            if (sec < duration) {
+                requestAnimationFrame(draw);
+            } else {
+                location.href = href;
+            }
+        }
+        requestAnimationFrame(draw);
+        // Retour arrière depuis le cache du navigateur : la page réapparaît intacte.
+        window.addEventListener('pageshow', () => { root.classList.remove('leaving'); s.canvas.remove(); }, { once: true });
     }
 
     // ----- Décor : Trantor -----
@@ -560,22 +701,18 @@
     items.forEach((el) => el.classList.add('fx-item'));
     root.classList.add('fx');
 
-    // Passage d'une page à l'autre en fondu. Les navigateurs récents enchaînent les deux pages
-    // eux-mêmes (@view-transition dans le CSS) ; pour les autres, la page s'efface avant de partir.
-    if (!('onpagereveal' in window)) {
-        document.addEventListener('click', (event) => {
-            const link = event.target.closest('a[href]');
-            if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
-                || link.target === '_blank' || link.hasAttribute('download') || link.origin !== location.origin
-                || (link.pathname === location.pathname && link.hash)) {
-                return;
-            }
-            event.preventDefault();
-            root.classList.add('leaving');
-            setTimeout(() => { location.href = link.href; }, 450);
-        });
-        window.addEventListener('pageshow', () => root.classList.remove('leaving'));
-    }
+    // Passage d'une page à l'autre : la page quittée se dissout en particules que le Radiant absorbe,
+    // et la page suivante se recompose à partir de ces particules (voir radiantGalaxy).
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href]');
+        if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
+            || link.target === '_blank' || link.hasAttribute('download') || link.origin !== location.origin
+            || (link.pathname === location.pathname && link.hash) || root.classList.contains('leaving')) {
+            return;
+        }
+        event.preventDefault();
+        dissolvePage(link.href);
+    });
 
     // Les éléments visibles au chargement se déploient en cascade ; les autres
     // au moment où ils entrent à l'écran.
@@ -646,7 +783,7 @@
         seen = false;
     }
     const FULL = { total: 12, wake: 2, rings: [2.4, 3.6, 4.8, 6], ringDur: 3.2, outDur: 0.9 };
-    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 0.9 };
+    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 1.2 };
     const T = seen ? SHORT : FULL;
     T.end = T.total - T.outDur;
 
@@ -695,8 +832,10 @@
     skip.type = 'button';
     skip.className = 'skip';
     skip.textContent = 'Passer l\'introduction';
-    const galaxy = radiantGalaxy(T.total);
-    intro.append(stage, galaxy.canvas, title, gate, skip);
+    // Entre deux pages, la poussière déborde de l'introduction pour aller se poser sur la page.
+    const galaxy = radiantGalaxy(T.total, seen);
+    intro.append(stage, title, gate, skip);
+    (seen ? document.body : intro).appendChild(galaxy.canvas);
     document.body.appendChild(intro);
 
     let done = false;

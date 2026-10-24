@@ -190,30 +190,62 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
-/* Survol : le panneau visé s'élève et s'illumine d'or, les autres s'effacent légèrement. */
+/* Survol : le panneau visé s'élève, se cerne d'un filet or et argent qui scintille,
+   et les autres panneaux s'effacent nettement pour le laisser seul en lumière. */
 .theme-fondation .card,
-.theme-fondation .competence { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s, border-color 0.45s, opacity 0.45s, filter 0.45s; }
+.theme-fondation .competence { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s, border-color 0.45s, background-color 0.45s, opacity 0.45s, filter 0.45s; }
 .theme-fondation .card::before,
-.theme-fondation .competence::before { transition: left 0.45s, right 0.45s, height 0.45s, box-shadow 0.45s; }
+.theme-fondation .competence::before { transition: left 0.45s, right 0.45s, height 0.45s, top 0.45s, box-shadow 0.45s, background 0.45s; }
+.theme-fondation .card::after,
+.theme-fondation .competence::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    padding: 2px;
+    border-radius: inherit;
+    background: linear-gradient(115deg, #b07d1f, #f3c063 18%, #f4f5f8 32%, #9aa1b0 46%, #e3c27a 60%, #c8952f 72%, #eef0f4 86%, #a9aebb);
+    background-size: 300% 100%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s;
+}
 .theme-fondation .card:hover,
 .theme-fondation .card:focus-within,
 .theme-fondation .competence:hover,
 .theme-fondation .competence:focus-within {
-    transform: translateY(-6px) scale(1.015);
-    border-color: var(--gold);
-    background: var(--surface-strong);
-    box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.55), 0 0 34px rgba(243, 192, 99, 0.35), 0 26px 50px rgba(120, 80, 20, 0.18);
+    transform: translateY(-8px) scale(1.025);
+    border-color: transparent;
+    background-color: #fffdf8;
+    box-shadow: 0 0 0 5px rgba(255, 253, 248, 0.95), 0 0 0 6px #a9aebb, 0 0 46px rgba(243, 192, 99, 0.5), 0 34px 60px rgba(60, 40, 10, 0.3);
     transition-delay: 0s;
     z-index: 2;
 }
+.theme-fondation .card:hover::after,
+.theme-fondation .card:focus-within::after,
+.theme-fondation .competence:hover::after,
+.theme-fondation .competence:focus-within::after { opacity: 1; animation: filet-sheen 3.5s linear infinite alternate; }
 .theme-fondation .card:hover::before,
 .theme-fondation .card:focus-within::before,
 .theme-fondation .competence:hover::before,
-.theme-fondation .competence:focus-within::before { left: -1px; right: -1px; height: 2px; box-shadow: 0 0 12px var(--glow); }
+.theme-fondation .competence:focus-within::before {
+    top: -2px;
+    left: 8%;
+    right: 8%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #c8952f, #ffffff, #9aa1b0, #ffffff, #c8952f, transparent);
+    box-shadow: 0 0 14px rgba(243, 192, 99, 0.9), 0 0 4px #fff;
+    z-index: 1;
+}
+.theme-fondation .competence:hover h2,
+.theme-fondation .competence:focus-within h2 { color: var(--accent); }
 .theme-fondation .competence:hover .code,
-.theme-fondation .competence:focus-within .code { box-shadow: 0 0 0 1px var(--gold), 0 0 14px rgba(243, 192, 99, 0.7); }
+.theme-fondation .competence:focus-within .code { box-shadow: 0 0 0 1px var(--gold), 0 0 0 3px #d9dce3, 0 0 16px rgba(243, 192, 99, 0.8); }
 .theme-fondation .cards:has(.card:hover) .card:not(:hover),
-.theme-fondation main:has(.competence:hover) .competence:not(:hover) { opacity: 0.6; filter: saturate(0.6); transition-delay: 0s; }
+.theme-fondation main:has(.competence:hover) .competence:not(:hover) { opacity: 0.35; filter: grayscale(0.7) blur(1px); transition-delay: 0s; }
+@keyframes filet-sheen { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
 .theme-fondation .card h3 a { color: var(--text); text-decoration: none; }
 .theme-fondation .card h3 a:hover { color: var(--accent); }
 .theme-fondation .competence { scroll-margin-top: 5rem; }
@@ -535,23 +567,16 @@
 .fx .card.is-in:hover,
 .fx .card.is-in:focus-within,
 .fx .competence.is-in:hover,
-.fx .competence.is-in:focus-within { transform: translateY(-6px) scale(1.015); }
+.fx .competence.is-in:focus-within { transform: translateY(-8px) scale(1.025); }
 
-/* Passage d'une page à l'autre : fondu enchaîné, la page quittée se dissout dans le Radiant de la suivante. */
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: page-dissolve 0.55s ease-in both; }
-::view-transition-new(root) { animation: page-appear 0.65s ease-out both; }
-@keyframes page-dissolve { to { opacity: 0; filter: blur(6px); } }
-@keyframes page-appear { from { opacity: 0; } }
-.a11y-motion::view-transition-old(root),
-.a11y-motion::view-transition-new(root) { animation: none; }
-/* Navigateurs sans enchaînement natif : la page s'efface avant de partir. */
-html.leaving body { opacity: 0; filter: blur(6px); transition: opacity 0.45s ease-in, filter 0.45s ease-in; }
-/* Introduction courte : apparaît en douceur et se dissout sans à-coup pendant que la page se déploie. */
-.radiant-intro.short.active { animation: intro-in 0.45s ease-out both, intro-dissolve var(--out-dur, 0.9s) ease-in-out var(--out-at, 2.1s) forwards; }
-@keyframes intro-in { from { opacity: 0; } }
+/* Passage d'une page à l'autre : la page s'efface pendant que sa poussière (canvas .page-dust) rejoint le Radiant. */
+.page-dust, .radiant-galaxy.free { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.page-dust { z-index: 200; }
+.radiant-galaxy.free { z-index: 101; }
+html.leaving body > *:not(.page-dust) { opacity: 0; transition: opacity 0.35s ease-in; }
+/* Introduction courte : prend le relais de la poussière de la page quittée et se dissout sans à-coup pendant que la page se déploie. */
+.radiant-intro.short.active { animation: intro-dissolve var(--out-dur, 0.9s) ease-in-out var(--out-at, 2.1s) forwards; }
 @keyframes intro-dissolve { to { opacity: 0; transform: scale(1.12); filter: blur(6px); visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) {
-    @view-transition { navigation: none; }
-    html.leaving body { transition: none; }
+    .theme-fondation .card::after, .theme-fondation .competence::after { animation: none !important; }
 }
