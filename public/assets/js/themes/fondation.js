@@ -383,6 +383,181 @@
         }
     }
 
+    // Réseau du Radiant (introduction complète) : une sphère de verre maillée enveloppe le Radiant ;
+    // un filet de poussière monte du cœur, puis des filaments dorés relient des nœuds qui éclatent
+    // en étoiles aux vrilles scintillantes, comme une toile cosmique.
+    function radiantWeb() {
+        const rnd = (a, b) => a + Math.random() * (b - a);
+        const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+        // Maille de la sphère : points répartis régulièrement (spirale de Fibonacci).
+        const mesh = [];
+        const meshCount = window.innerWidth < 760 ? 420 : 900;
+        for (let i = 0; i < meshCount; i++) {
+            const y = 1 - (2 * (i + 0.5)) / meshCount;
+            const r = Math.sqrt(1 - y * y);
+            const a = i * 2.39996;
+            mesh.push([Math.cos(a) * r, y, Math.sin(a) * r]);
+        }
+        // Nœuds répartis en couronne dans la moitié haute de la sphère.
+        const nodes = [];
+        const nodeCount = 8;
+        for (let i = 0; i < nodeCount; i++) {
+            const a = (i / nodeCount) * 6.283 + rnd(-0.25, 0.25);
+            const r = rnd(0.55, 0.85);
+            const y = rnd(-0.15, 0.6);
+            const tendrils = [];
+            for (let t = 0; t < 12; t++) {
+                // Vrille : marche aléatoire en zigzag, en pixels relatifs à la taille de la sphère.
+                let ang = Math.random() * 6.283;
+                const pts = [[0, 0]];
+                let x = 0, yy = 0;
+                const steps = 4 + Math.floor(Math.random() * 6);
+                for (let s = 0; s < steps; s++) {
+                    ang += rnd(-0.9, 0.9);
+                    const len = rnd(0.012, 0.03);
+                    x += Math.cos(ang) * len;
+                    yy += Math.sin(ang) * len;
+                    pts.push([x, yy]);
+                }
+                tendrils.push(pts);
+            }
+            nodes.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r], tendrils, lit: 1 });
+        }
+        // Filaments : une chaîne qui fait le tour, deux liaisons transverses, et le filet qui monte du cœur.
+        const links = [[-1, 0]];
+        for (let i = 0; i < nodeCount - 1; i++) {
+            links.push([i, i + 1]);
+        }
+        links.push([1, 5], [3, 7]);
+        const FIL = [[200, 140, 30], [214, 160, 60], [120, 132, 152], [40, 160, 150]];
+        const edges = links.map(([a, b], index) => {
+            const A = a < 0 ? [0, -0.05, 0] : nodes[a].p;
+            const B = nodes[b].p;
+            // Point de contrôle poussé vers la paroi : le filament épouse la courbure de la sphère.
+            const M = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2];
+            const len = Math.hypot(M[0], M[1], M[2]) || 1;
+            const push = a < 0 ? 1 : 0.92 / len;
+            const C = [M[0] * push + gauss() * 0.15, M[1] * push + gauss() * 0.15, M[2] * push + gauss() * 0.15];
+            const grains = [];
+            const n = a < 0 ? 220 : 420;
+            for (let i = 0; i < n; i++) {
+                const r = Math.random();
+                grains.push({
+                    u: Math.random(), speed: rnd(0.04, 0.14), tw: Math.random() * 6.28,
+                    off: [gauss() * 0.05, gauss() * 0.05, gauss() * 0.05],
+                    col: r < 0.68 ? FIL[0] : r < 0.8 ? FIL[1] : r < 0.92 ? FIL[2] : FIL[3],
+                    size: Math.random() < 0.06 ? 2.2 : rnd(0.6, 1.4),
+                });
+            }
+            return { A, B, C, a, b, grains, start: 0.32 + index * 0.022 };
+        });
+        edges.forEach((e) => {
+            if (e.b >= 0) {
+                nodes[e.b].lit = Math.min(nodes[e.b].lit, e.start + 0.06);
+            }
+            if (e.a >= 0) {
+                nodes[e.a].lit = Math.min(nodes[e.a].lit, e.start + 0.06);
+            }
+        });
+        const bez = (e, u, i) => (1 - u) * (1 - u) * e.A[i] + 2 * (1 - u) * u * e.C[i] + u * u * e.B[i];
+
+        return function draw(c, cx, cy, R, sec, k, fade) {
+            const appear = ease((k - 0.28) / 0.1) * fade;
+            if (appear <= 0) {
+                return;
+            }
+            const Rw = R * 1.08;
+            const yaw = sec * 0.06;
+            const tilt = 0.22;
+            const cyw = Math.cos(yaw), syw = Math.sin(yaw), ct = Math.cos(tilt), st = Math.sin(tilt);
+            const out = [0, 0, 0];
+            const project = (x, y, z) => {
+                const rx = x * cyw - z * syw;
+                const rz = x * syw + z * cyw;
+                const y2 = y * ct - rz * st;
+                const z2 = y * st + rz * ct;
+                const persp = 2.6 / (2.6 + z2);
+                out[0] = cx + rx * Rw * persp;
+                out[1] = cy - y2 * Rw * persp;
+                out[2] = z2;
+                return out;
+            };
+            // Paroi de verre : contour argenté, maille plus visible sur les bords.
+            c.strokeStyle = 'rgba(150, 160, 178, ' + (0.35 * appear).toFixed(3) + ')';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.arc(cx, cy, Rw * 0.985, 0, 6.283);
+            c.stroke();
+            for (const m of mesh) {
+                const q = project(m[0], m[1], m[2]);
+                const rim = 1 - Math.abs(q[2]);
+                const alpha = (0.14 + 0.6 * rim * rim) * appear * (q[2] > 0 ? 0.6 : 1);
+                c.fillStyle = 'rgba(120, 132, 152, ' + alpha.toFixed(3) + ')';
+                c.fillRect(q[0] - 0.75, q[1] - 0.75, 1.5, 1.5);
+            }
+            // Filaments de poussière qui coulent d'un nœud à l'autre.
+            for (const e of edges) {
+                const grow = ease((k - e.start) / 0.09);
+                if (grow <= 0) {
+                    continue;
+                }
+                // Âme du filament : un trait doré léger sous la poussière.
+                c.strokeStyle = 'rgba(200, 145, 40, ' + (0.4 * appear).toFixed(3) + ')';
+                c.lineWidth = 1.2;
+                c.beginPath();
+                for (let i = 0; i <= 28; i++) {
+                    const u = (i / 28) * grow;
+                    const q = project(bez(e, u, 0), bez(e, u, 1), bez(e, u, 2));
+                    if (i === 0) { c.moveTo(q[0], q[1]); } else { c.lineTo(q[0], q[1]); }
+                }
+                c.stroke();
+                for (const g of e.grains) {
+                    const u = (g.u + sec * g.speed) % 1;
+                    if (u > grow) {
+                        continue;
+                    }
+                    const thick = Math.sin(u * 3.1416) + 0.25;
+                    const q = project(bez(e, u, 0) + g.off[0] * thick, bez(e, u, 1) + g.off[1] * thick, bez(e, u, 2) + g.off[2] * thick);
+                    const twinkle = 0.55 + 0.45 * Math.sin(sec * 5 + g.tw);
+                    dot(c, q[0], q[1], g.size, g.col, twinkle * appear * 0.95);
+                }
+            }
+            // Nœuds : éclat lumineux et vrilles qui se déploient en zigzag.
+            const scale = Rw;
+            for (const node of nodes) {
+                const burst = ease((k - node.lit) / 0.07);
+                if (burst <= 0) {
+                    continue;
+                }
+                const q = project(node.p[0], node.p[1], node.p[2]);
+                const x0 = q[0], y0 = q[1];
+                const glow = c.createRadialGradient(x0, y0, 0, x0, y0, scale * 0.07);
+                glow.addColorStop(0, 'rgba(255, 210, 120, ' + (0.75 * burst * appear).toFixed(3) + ')');
+                glow.addColorStop(1, 'rgba(255, 210, 120, 0)');
+                c.fillStyle = glow;
+                c.fillRect(x0 - scale * 0.07, y0 - scale * 0.07, scale * 0.14, scale * 0.14);
+                c.strokeStyle = 'rgba(190, 135, 30, ' + (0.6 * appear).toFixed(3) + ')';
+                c.lineWidth = 0.7;
+                c.beginPath();
+                for (const pts of node.tendrils) {
+                    const upto = Math.max(1, Math.round((pts.length - 1) * burst));
+                    c.moveTo(x0, y0);
+                    for (let i = 1; i <= upto; i++) {
+                        c.lineTo(x0 + pts[i][0] * scale, y0 + pts[i][1] * scale);
+                    }
+                }
+                c.stroke();
+                for (const pts of node.tendrils) {
+                    const upto = Math.max(1, Math.round((pts.length - 1) * burst));
+                    for (let i = 1; i <= upto; i++) {
+                        const twinkle = 0.5 + 0.5 * Math.sin(sec * 7 + i * 1.7 + pts[i][0] * 400);
+                        dot(c, x0 + pts[i][0] * scale, y0 + pts[i][1] * scale, 1.6, [214, 160, 50], twinkle * appear);
+                    }
+                }
+            }
+        };
+    }
+
     // ----- Ouverture du Radiant : jaillissement de particules qui forment une galaxie -----
     // Introduction complète : les particules sortent du cœur en spirale, s'organisent en galaxie
     // aérée à bras spiraux entourée d'une sphère de poussière, tournent comme une vraie galaxie
@@ -427,6 +602,7 @@
             parts.push(p);
         }
         let targets = null;
+        const web = arrive ? null : radiantWeb();
 
         window.addEventListener('resize', s.resize);
         let t0 = 0;
@@ -494,6 +670,9 @@
                 }
                 const twinkle = 0.6 + 0.4 * Math.sin(sec * 3 + p.tw);
                 dot(c, px, py, size, col, Math.min(1, life * 2) * twinkle * fade * (0.6 + 0.4 * persp));
+            }
+            if (web) {
+                web(c, cx, cy, R, sec, k, fadeOut);
             }
             // Lueur du noyau galactique.
             const glow = (arrive ? 1 - ease((k - 0.15) / 0.35) : ease((k - 0.2) / 0.2)) * fadeOut;

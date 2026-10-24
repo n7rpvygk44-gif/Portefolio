@@ -249,7 +249,6 @@
 .theme-fondation .card h3 a { color: var(--text); text-decoration: none; }
 .theme-fondation .card h3 a:hover { color: var(--accent); }
 .theme-fondation .competence { scroll-margin-top: 5rem; }
-.theme-fondation .competence:target { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200, 149, 47, 0.25); }
 .theme-fondation .code {
     font: 600 0.8em var(--display);
     letter-spacing: 0.1em;
@@ -580,3 +579,12 @@ html.leaving body > *:not(.page-dust) { opacity: 0; transition: opacity 0.25s ea
 @media (prefers-reduced-motion: reduce) {
     .theme-fondation .card::after, .theme-fondation .competence::after { animation: none !important; }
 }
+
+/* Compétence choisie depuis l'accueil : centrée à l'écran (main.js) et cernée du filet or et argent. */
+.theme-fondation .competence:target {
+    border-color: transparent;
+    background-color: #fffdf8;
+    box-shadow: 0 0 0 5px rgba(255, 253, 248, 0.95), 0 0 0 6px #a9aebb, 0 0 46px rgba(243, 192, 99, 0.5), 0 34px 60px rgba(60, 40, 10, 0.3);
+}
+.theme-fondation .competence:target::after { opacity: 1; animation: filet-sheen 3.5s linear infinite alternate; }
+.theme-fondation .competence:target h2 { color: var(--accent); }

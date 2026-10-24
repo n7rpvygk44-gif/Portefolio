@@ -106,4 +106,15 @@
             filter.dispatchEvent(new Event('input'));
         }
     }
+
+    // Compétence choisie depuis l'accueil (#b1-2…) : elle est placée au centre de l'écran.
+    function centerTarget() {
+        const id = decodeURIComponent(location.hash.slice(1));
+        const target = id ? document.getElementById(id) : null;
+        if (target && target.classList.contains('competence')) {
+            target.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }
+    }
+    window.addEventListener('load', () => requestAnimationFrame(centerTarget));
+    window.addEventListener('hashchange', centerTarget);
 })();
