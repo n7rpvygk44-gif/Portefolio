@@ -190,9 +190,30 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
-.theme-fondation .card { transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; }
+/* Survol : le panneau visé s'élève et s'illumine d'or, les autres s'effacent légèrement. */
+.theme-fondation .card,
+.theme-fondation .competence { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s, border-color 0.45s, opacity 0.45s, filter 0.45s; }
+.theme-fondation .card::before,
+.theme-fondation .competence::before { transition: left 0.45s, right 0.45s, height 0.45s, box-shadow 0.45s; }
 .theme-fondation .card:hover,
-.theme-fondation .card:focus-within { transform: translateY(-3px); border-color: rgba(200, 149, 47, 0.5); box-shadow: 0 22px 44px rgba(200, 149, 47, 0.16); }
+.theme-fondation .card:focus-within,
+.theme-fondation .competence:hover,
+.theme-fondation .competence:focus-within {
+    transform: translateY(-6px) scale(1.015);
+    border-color: var(--gold);
+    background: var(--surface-strong);
+    box-shadow: 0 0 0 1px rgba(200, 149, 47, 0.55), 0 0 34px rgba(243, 192, 99, 0.35), 0 26px 50px rgba(120, 80, 20, 0.18);
+    transition-delay: 0s;
+    z-index: 2;
+}
+.theme-fondation .card:hover::before,
+.theme-fondation .card:focus-within::before,
+.theme-fondation .competence:hover::before,
+.theme-fondation .competence:focus-within::before { left: -1px; right: -1px; height: 2px; box-shadow: 0 0 12px var(--glow); }
+.theme-fondation .competence:hover .code,
+.theme-fondation .competence:focus-within .code { box-shadow: 0 0 0 1px var(--gold), 0 0 14px rgba(243, 192, 99, 0.7); }
+.theme-fondation .cards:has(.card:hover) .card:not(:hover),
+.theme-fondation main:has(.competence:hover) .competence:not(:hover) { opacity: 0.6; filter: saturate(0.6); transition-delay: 0s; }
 .theme-fondation .card h3 a { color: var(--text); text-decoration: none; }
 .theme-fondation .card h3 a:hover { color: var(--accent); }
 .theme-fondation .competence { scroll-margin-top: 5rem; }
@@ -458,7 +479,7 @@
 /* Éclat doré au moment où un panneau se matérialise */
 .fx .card.is-in,
 .fx .competence.is-in,
-.fx .hero.is-in { animation: materialise 1.6s ease-out calc(var(--i, 0) * 90ms) both; }
+.fx .hero.is-in { animation: materialise 1.6s ease-out calc(var(--i, 0) * 90ms) backwards; }
 @keyframes materialise {
     0% { box-shadow: 0 0 0 1px rgba(243, 192, 99, 0), 0 0 0 rgba(243, 192, 99, 0); }
     35% { box-shadow: 0 0 0 1px rgba(243, 192, 99, 0.9), 0 0 40px rgba(243, 192, 99, 0.45); }
@@ -504,22 +525,33 @@
 .radiant-intro .ring text { fill: #8a5a12; font-weight: 600; }
 .radiant-intro .ring svg { filter: drop-shadow(0 0 2px rgba(243, 192, 99, 0.8)); }
 
-/* Ouverture du Radiant : la pièce s'assombrit, la galaxie de particules se forme, puis la lumière revient.
+/* Ouverture du Radiant : la galaxie de particules se forme dans la pièce claire.
    Les étapes suivent la durée de l'introduction (--turn). */
 .radiant-galaxy { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
-.radiant-intro::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 50%, #1c1a22 0%, #0b0c12 70%);
-    opacity: 0;
-    pointer-events: none;
-}
-.radiant-intro.active::before { animation: room-dark var(--turn, 12s) ease-in-out forwards; }
-.radiant-intro.active .title { animation: title-night var(--turn, 12s) ease-in-out forwards; }
-.radiant-intro.active .title span { animation: title-night-sub var(--turn, 12s) ease-in-out forwards; }
-.radiant-intro.active .skip { color: #d8cfbd; border-color: rgba(216, 207, 189, 0.4); }
-@keyframes room-dark { 0%, 12% { opacity: 0; } 24%, 82% { opacity: 1; } 95%, 100% { opacity: 0; } }
-@keyframes title-night { 0%, 12% { color: var(--text); } 24%, 82% { color: #f3ead6; } 95%, 100% { color: var(--text); } }
-@keyframes title-night-sub { 0%, 12% { color: var(--accent); } 24%, 82% { color: var(--glow); } 95%, 100% { color: var(--accent); } }
 .radiant-intro .title, .radiant-intro .gate, .radiant-intro .skip { z-index: 3; }
+
+/* Survol après le déploiement : réaction immédiate, le panneau visé passe devant les autres. */
+.fx .fx-item.is-in.settled { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s, border-color 0.45s, opacity 0.45s, filter 0.45s; transition-delay: 0s; }
+.fx .card.is-in:hover,
+.fx .card.is-in:focus-within,
+.fx .competence.is-in:hover,
+.fx .competence.is-in:focus-within { transform: translateY(-6px) scale(1.015); }
+
+/* Passage d'une page à l'autre : fondu enchaîné, la page quittée se dissout dans le Radiant de la suivante. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: page-dissolve 0.55s ease-in both; }
+::view-transition-new(root) { animation: page-appear 0.65s ease-out both; }
+@keyframes page-dissolve { to { opacity: 0; filter: blur(6px); } }
+@keyframes page-appear { from { opacity: 0; } }
+.a11y-motion::view-transition-old(root),
+.a11y-motion::view-transition-new(root) { animation: none; }
+/* Navigateurs sans enchaînement natif : la page s'efface avant de partir. */
+html.leaving body { opacity: 0; filter: blur(6px); transition: opacity 0.45s ease-in, filter 0.45s ease-in; }
+/* Introduction courte : apparaît en douceur et se dissout sans à-coup pendant que la page se déploie. */
+.radiant-intro.short.active { animation: intro-in 0.45s ease-out both, intro-dissolve var(--out-dur, 0.9s) ease-in-out var(--out-at, 2.1s) forwards; }
+@keyframes intro-in { from { opacity: 0; } }
+@keyframes intro-dissolve { to { opacity: 0; transform: scale(1.12); filter: blur(6px); visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) {
+    @view-transition { navigation: none; }
+    html.leaving body { transition: none; }
+}

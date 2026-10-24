@@ -290,12 +290,13 @@
         const small = window.innerWidth < 760;
         const count = small ? 2400 : 6500;
         const palette = [
-            [255, 214, 130, 0.34],   // or
-            [235, 238, 245, 0.28],   // argent
-            [150, 200, 255, 0.12],   // bleu
-            [255, 120, 110, 0.08],   // rouge
-            [140, 235, 170, 0.08],   // vert
-            [200, 150, 255, 0.10],   // violet
+            // Teintes soutenues pour rester visibles sur l'ivoire de la pièce.
+            [200, 140, 30, 0.34],    // or
+            [120, 132, 152, 0.26],   // argent
+            [50, 110, 200, 0.12],    // bleu
+            [205, 55, 60, 0.09],     // rouge
+            [30, 150, 95, 0.09],     // vert
+            [130, 70, 205, 0.10],    // violet
         ];
         const pick = () => {
             let r = Math.random();
@@ -359,7 +360,6 @@
             const k = sec / total;                       // avancement 0..1
             c.setTransform(dpr, 0, 0, dpr, 0, 0);
             c.clearRect(0, 0, w, h);
-            c.globalCompositeOperation = 'lighter';
             const cx = w / 2, cy = h / 2;
             // Taille de la galaxie : elle grandit puis envahit la pièce à la fin.
             const base = Math.min(w, h) * 0.42;
@@ -412,12 +412,11 @@
             const glow = ease((k - 0.2) / 0.2) * fadeOut;
             if (glow > 0) {
                 const g = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.35);
-                g.addColorStop(0, 'rgba(255, 236, 190, ' + (0.45 * glow) + ')');
-                g.addColorStop(1, 'rgba(255, 200, 120, 0)');
+                g.addColorStop(0, 'rgba(255, 214, 140, ' + (0.55 * glow) + ')');
+                g.addColorStop(1, 'rgba(255, 214, 140, 0)');
                 c.fillStyle = g;
                 c.fillRect(cx - R, cy - R, R * 2, R * 2);
             }
-            c.globalCompositeOperation = 'source-over';
             if (k < 1) {
                 frame = requestAnimationFrame(draw);
             }
@@ -533,6 +532,18 @@
         hero.appendChild(heroRadiant);
     }
 
+    // Un clic sur le nom ramène à la page de garde : l'introduction complète et son écran d'accueil.
+    const brand = document.querySelector('.brand');
+    if (brand) {
+        brand.addEventListener('click', () => {
+            try {
+                sessionStorage.removeItem('fondation-intro');
+            } catch (e) {
+                // Sans stockage de session, l'introduction complète s'affiche de toute façon.
+            }
+        });
+    }
+
     // ----- Cinématique -----
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
         || root.classList.contains('a11y-motion')
@@ -548,6 +559,23 @@
     document.querySelectorAll('main > *:not(.plan):not(script), .plan > h2, .plan > .lead, main .cards > li, main .competence, .site-footer .container').forEach(add);
     items.forEach((el) => el.classList.add('fx-item'));
     root.classList.add('fx');
+
+    // Passage d'une page à l'autre en fondu. Les navigateurs récents enchaînent les deux pages
+    // eux-mêmes (@view-transition dans le CSS) ; pour les autres, la page s'efface avant de partir.
+    if (!('onpagereveal' in window)) {
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a[href]');
+            if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
+                || link.target === '_blank' || link.hasAttribute('download') || link.origin !== location.origin
+                || (link.pathname === location.pathname && link.hash)) {
+                return;
+            }
+            event.preventDefault();
+            root.classList.add('leaving');
+            setTimeout(() => { location.href = link.href; }, 450);
+        });
+        window.addEventListener('pageshow', () => root.classList.remove('leaving'));
+    }
 
     // Les éléments visibles au chargement se déploient en cascade ; les autres
     // au moment où ils entrent à l'écran.
@@ -570,6 +598,8 @@
     function reveal(el) {
         el.style.setProperty('--i', String(Math.min(wave++, 12)));
         el.classList.add('is-in');
+        // Une fois posé, le panneau réagit au survol sans le délai du déploiement.
+        setTimeout(() => el.classList.add('settled'), 2400);
         document.dispatchEvent(new CustomEvent('portfolio:reveal'));
         // Les éléments suivants qui apparaissent au défilement ne patientent pas.
         clearTimeout(reveal.timer);
@@ -616,7 +646,7 @@
         seen = false;
     }
     const FULL = { total: 12, wake: 2, rings: [2.4, 3.6, 4.8, 6], ringDur: 3.2, outDur: 0.9 };
-    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 0.6 };
+    const SHORT = { total: 3, wake: 0.6, rings: [0.25, 0.5, 0.75, 1], ringDur: 1.1, outDur: 0.9 };
     const T = seen ? SHORT : FULL;
     T.end = T.total - T.outDur;
 
@@ -701,8 +731,9 @@
         if (!seen) {
             skip.focus({ preventScroll: true });
         }
-        // Le déploiement de l'interface commence pendant que l'introduction s'efface.
-        setTimeout(start, (T.end + 0.1) * 1000);
+        // Le déploiement de l'interface commence pendant que l'introduction s'efface ;
+        // entre deux pages, les deux se fondent l'un dans l'autre.
+        setTimeout(start, (T.end + (seen ? -0.3 : 0.1)) * 1000);
         setTimeout(finish, T.total * 1000);
     }
     function onKey(event) {
