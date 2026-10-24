@@ -340,8 +340,8 @@
     // le bleu, le rouge, le vert, le violet et l'orange ne sont que de rares touches.
     const DUST = [
         [200, 140, 30, 0.50],    // or
-        [120, 132, 152, 0.40],   // argent
-        [50, 110, 200, 0.03],    // bleu
+        [156, 151, 142, 0.415],  // argent : gris à peine chaud, qui reste neutre sur l'ivoire
+        [50, 110, 200, 0.015],   // bleu
         [205, 55, 60, 0.0175],   // rouge
         [30, 150, 95, 0.0175],   // vert
         [130, 70, 205, 0.0175],  // violet
