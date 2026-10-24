@@ -16,8 +16,8 @@
     const root = document.documentElement;
 
     // ----- Le Radiant Prime en 3D (canvas, sans bibliothèque) -----
-    // Icosaèdre de verre ambré, treillis doré intérieur (dodécaèdre et icosaèdre imbriqués,
-    // rayons vers les faces), cœur lumineux qui pulse. Création originale d'après la forme
+    // Icosaèdre transparent fait de fils d'or pailletés : treillis intérieur (dodécaèdre et
+    // icosaèdre imbriqués, cordes en étoile entre les sommets), petit cristal blanc au cœur qui pulse. Création originale d'après la forme
     // géométrique du Radiant ; le rendu 3D est calculé à la main (rotation + perspective).
     const PHI = (1 + Math.sqrt(5)) / 2;
     const ICO_VERTS = [
@@ -74,6 +74,14 @@
         ICO_FACES.forEach((f, i) => f.forEach((k) => lines.push([dodeca[i], innerIco[k], 0.7])));
         // 5. Fines branches vers le cœur.
         innerIco.forEach((v) => lines.push([v, scale(v, 0.12), 0.85]));
+        // 6. Cordes en étoile : chaque sommet relié aux sommets non voisins, à travers le volume.
+        ICO_VERTS.forEach((v, i) => ICO_VERTS.forEach((u, j) => {
+            if (j > i && !ICO_EDGES.some((e) => (e.a === i && e.b === j) || (e.a === j && e.b === i)) && Math.hypot(v[0] + u[0], v[1] + u[1], v[2] + u[2]) > 0.2) {
+                lines.push([v, u, 0.15]);
+            }
+        }));
+        // Paillettes : quelques grains brillants posés le long de chaque fil.
+        lines.forEach((line) => { line.push([Math.random(), Math.random(), Math.random()], Math.random() * 6.28); });
         return lines;
     })();
 
@@ -128,50 +136,39 @@
             const pulse = 0.85 + 0.15 * Math.sin(time * 1.6);
             const glow = level * pulse;
 
-            // Halo derrière l'objet.
-            const halo = c.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
-            halo.addColorStop(0, 'rgba(255, 214, 140, ' + (0.35 * glow) + ')');
+            // Halo doré derrière l'objet : la lumière du cœur qui baigne la pièce.
+            const halo = c.createRadialGradient(cx, cy, 0, cx, cy, R * 1.7);
+            halo.addColorStop(0, 'rgba(255, 205, 120, ' + (0.5 * glow) + ')');
+            halo.addColorStop(0.45, 'rgba(255, 214, 140, ' + (0.18 * glow) + ')');
             halo.addColorStop(1, 'rgba(255, 214, 140, 0)');
             c.fillStyle = halo;
             c.fillRect(0, 0, w, w);
 
-            // Faces : verre ambré fumé, celles de derrière d'abord.
-            const faces = ICO_FACES.map((f) => {
-                const a = P[f[0]], b = P[f[1]], d = P[f[2]];
-                const facing = (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]);
-                return { f, z: (a[2] + b[2] + d[2]) / 3, back: facing > 0 };
-            }).sort((m, n) => n.z - m.z);
-            const paint = (face) => {
-                const [a, b, d] = face.f.map((k) => P[k]);
-                c.beginPath();
-                c.moveTo(a[0], a[1]);
-                c.lineTo(b[0], b[1]);
-                c.lineTo(d[0], d[1]);
-                c.closePath();
-                c.fillStyle = face.back ? 'rgba(46, 32, 14, 0.78)' : 'rgba(150, 105, 35, ' + (0.1 + 0.05 * Math.max(0, -face.z)) + ')';
-                c.fill();
-            };
-            faces.filter((x) => x.back).forEach(paint);
-
-            // Treillis doré intérieur (lumière additive). Les segments sont regroupés par niveau
-            // d'apparition et par profondeur pour limiter le nombre de tracés (fluidité).
-            c.globalCompositeOperation = 'lighter';
+            // Structure transparente en fils d'or : les fils du fond sont plus fins et plus pâles.
+            // Les segments sont regroupés par niveau d'apparition et par profondeur (fluidité).
             c.lineCap = 'round';
-            c.lineWidth = Math.max(0.8, w / 260);
+            const thin = Math.max(0.6, w / 360);
             const groups = new Map();
-            LATTICE.forEach(([A, B, at]) => {
+            const grains = [];
+            LATTICE.forEach(([A, B, at, seeds, tw]) => {
                 const a = project(A), b = project(B);
-                const bucket = (a[2] + b[2]) < -0.3 ? 0 : (a[2] + b[2]) < 0.4 ? 1 : 2;
+                const zMid = (a[2] + b[2]) / 2;
+                const bucket = zMid > 0.25 ? 0 : zMid > -0.25 ? 1 : 2;
                 const key = at + '|' + bucket;
                 if (!groups.has(key)) {
                     groups.set(key, { at, bucket, pts: [] });
                 }
                 groups.get(key).pts.push(a, b);
+                const show = Math.min(1, Math.max(0, (fade - at) / 0.25));
+                if (show > 0) {
+                    seeds.forEach((t, n) => grains.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, bucket, show, tw + n * 2.1]));
+                }
             });
             groups.forEach(({ at, bucket, pts }) => {
                 const show = Math.min(1, Math.max(0, (fade - at) / 0.25));
-                const depth = [1, 0.75, 0.5][bucket];
-                c.strokeStyle = 'rgba(240, 190, 90, ' + (0.85 * depth * (0.35 + 0.65 * show * glow)) + ')';
+                const depth = [0.45, 0.7, 1][bucket];
+                c.strokeStyle = 'rgba(176, 122, 34, ' + (depth * (0.25 + 0.6 * show * (0.4 + 0.6 * glow))).toFixed(3) + ')';
+                c.lineWidth = thin * (0.7 + 0.5 * depth);
                 c.beginPath();
                 for (let i = 0; i < pts.length; i += 2) {
                     c.moveTo(pts[i][0], pts[i][1]);
@@ -179,52 +176,60 @@
                 }
                 c.stroke();
             });
-
-            // Cœur lumineux.
-            if (glow > 0.02) {
-                const core = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.42 * (0.8 + 0.3 * glow));
-                core.addColorStop(0, 'rgba(255, 255, 245, ' + Math.min(1, 1.1 * glow) + ')');
-                core.addColorStop(0.18, 'rgba(255, 236, 180, ' + (0.9 * glow) + ')');
-                core.addColorStop(0.5, 'rgba(255, 190, 90, ' + (0.35 * glow) + ')');
-                core.addColorStop(1, 'rgba(255, 170, 60, 0)');
-                c.fillStyle = core;
+            // Arêtes extérieures : fils d'or plus épais, qui dessinent la silhouette.
+            ICO_EDGES.forEach((e) => {
+                const a = P[e.a], b = P[e.b];
+                const front = (a[2] + b[2]) < 0.2;
+                c.strokeStyle = front ? 'rgba(196, 140, 44, 0.95)' : 'rgba(176, 125, 45, 0.5)';
+                c.lineWidth = front ? Math.max(1.2, w / 150) : Math.max(0.8, w / 260);
                 c.beginPath();
-                c.arc(cx, cy, R * 0.5, 0, Math.PI * 2);
+                c.moveTo(a[0], a[1]);
+                c.lineTo(b[0], b[1]);
+                c.stroke();
+            });
+            // Paillettes qui scintillent sur les fils.
+            const gs = Math.max(1, w / 170);
+            for (const g of grains) {
+                const twinkle = 0.5 + 0.5 * Math.sin(time * 3 + g[4]);
+                c.globalAlpha = Math.min(1, g[3] * twinkle * [0.5, 0.75, 1][g[2]]);
+                c.fillStyle = twinkle > 0.85 ? '#fff6dc' : '#e0a83c';
+                c.fillRect(g[0] - gs / 2, g[1] - gs / 2, gs, gs);
+            }
+            c.globalAlpha = 1;
+
+            // Cœur : un petit cristal blanc éblouissant, entouré d'une aura dorée.
+            if (glow > 0.02) {
+                const aura = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.55);
+                aura.addColorStop(0, 'rgba(255, 252, 240, ' + Math.min(1, glow) + ')');
+                aura.addColorStop(0.2, 'rgba(255, 236, 180, ' + (0.9 * glow) + ')');
+                aura.addColorStop(0.55, 'rgba(250, 190, 90, ' + (0.4 * glow) + ')');
+                aura.addColorStop(1, 'rgba(250, 180, 70, 0)');
+                c.fillStyle = aura;
+                c.beginPath();
+                c.arc(cx, cy, R * 0.55, 0, Math.PI * 2);
+                c.fill();
+                // Cristal du cœur : un cube vu en biais, qui tourne avec l'objet.
+                const k = R * 0.1 * (0.85 + 0.25 * glow);
+                const cube = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]]
+                    .map((v) => project(scale(v, k / R)));
+                const hull = [0, 1, 5, 6, 7, 3].map((n) => cube[n]);
+                c.fillStyle = 'rgba(255, 255, 250, ' + Math.min(1, 0.6 + 0.5 * glow) + ')';
+                c.beginPath();
+                hull.forEach((p, n) => (n ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])));
+                c.closePath();
                 c.fill();
                 // Éclats en étoile.
-                c.strokeStyle = 'rgba(255, 245, 210, ' + (0.5 * glow) + ')';
+                c.strokeStyle = 'rgba(255, 250, 225, ' + (0.7 * glow) + ')';
                 c.lineWidth = 1;
-                for (let i = 0; i < 6; i++) {
-                    const ang = i * Math.PI / 3 + time * 0.2;
-                    const len = R * (0.18 + 0.06 * Math.sin(time * 2 + i)) * glow;
+                for (let i = 0; i < 8; i++) {
+                    const ang = i * Math.PI / 4 + time * 0.2;
+                    const len = R * (0.22 + 0.08 * Math.sin(time * 2 + i)) * glow;
                     c.beginPath();
                     c.moveTo(cx, cy);
                     c.lineTo(cx + Math.cos(ang) * len, cy + Math.sin(ang) * len);
                     c.stroke();
                 }
             }
-            c.globalCompositeOperation = 'source-over';
-
-            // Faces avant (verre translucide) puis arêtes dorées.
-            faces.filter((x) => !x.back).forEach(paint);
-            ICO_EDGES.forEach((e) => {
-                const a = P[e.a], b = P[e.b];
-                const front = (a[2] + b[2]) < 0.2;
-                c.strokeStyle = front ? 'rgba(214, 168, 72, 0.95)' : 'rgba(170, 125, 45, 0.55)';
-                c.lineWidth = front ? Math.max(1.4, w / 130) : Math.max(1, w / 220);
-                c.beginPath();
-                c.moveTo(a[0], a[1]);
-                c.lineTo(b[0], b[1]);
-                c.stroke();
-            });
-            // Reflet sur le verre.
-            const shine = c.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
-            shine.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
-            shine.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
-            c.fillStyle = shine;
-            c.beginPath();
-            c.arc(cx, cy, R * 1.05, 0, Math.PI * 2);
-            c.fill();
         }
 
         function loop(now) {
@@ -595,9 +600,9 @@
                 p.a = Math.random() * 6.28;
                 p.y = u * shell;
             }
-            p.emit = arrive ? Math.random() * 0.06 : 0.17 + Math.random() * 0.2;   // moment où la particule jaillit
-            p.flight = arrive ? 0.1 + Math.random() * 0.12 : 0.12 + Math.random() * 0.1;
-            p.swirl = 2.5 + Math.random() * 2.5;     // tours de spirale pendant le vol
+            p.emit = arrive ? Math.random() * 0.06 : 0.15 + Math.pow(Math.random(), 1.4) * 0.32;   // moment où la particule est projetée
+            p.flight = arrive ? 0.1 + Math.random() * 0.12 : 0.07 + Math.random() * 0.09;
+            p.swirl = 0.4 + Math.random() * 0.8;     // léger enroulement pendant le vol
             p.land = 0.15 + Math.random() * 0.4;     // (arrivée) départ vers la page, échelonné pour un mouvement continu
             parts.push(p);
         }
@@ -634,12 +639,30 @@
                 if (life <= 0) {
                     continue;
                 }
-                const f = ease(life);
+                // Projection depuis le cœur : la particule part du centre comme un rayon de lumière,
+                // très vite d'abord puis en ralentissant jusqu'à sa place dans la galaxie.
+                const f = life >= 1 ? 1 : 1 - Math.pow(1 - life, 3);
                 // Rotation différentielle : le centre tourne plus vite que le bord.
                 const spin = p.sphere ? sec * 0.08 : sec * (0.5 / (0.25 + p.r));
-                const ang = p.a + spin + (1 - f) * p.swirl * 6.28;
+                const ang = p.a + spin + (1 - f) * p.swirl;
                 const rad = p.r * f;
-                const lift = p.y * f + (1 - f) * Math.sin(life * 3.14) * 0.35;  // arc du jaillissement
+                const lift = p.y * f;
+                if (life < 1) {
+                    // Traînée lumineuse tournée vers le cœur : on voit d'où la particule est projetée.
+                    const back = f * 0.7;
+                    const bx = Math.cos(ang + yaw) * p.r * back;
+                    const bz0 = Math.sin(ang + yaw) * p.r * back;
+                    const by = p.y * back * ct - bz0 * st;
+                    const bp = 2.4 / (2.4 + p.y * back * st + bz0 * ct);
+                    const hx = Math.cos(ang + yaw) * rad, hz0 = Math.sin(ang + yaw) * rad;
+                    const hp = 2.4 / (2.4 + lift * st + hz0 * ct);
+                    c.strokeStyle = 'rgba(' + p.col[0] + ',' + p.col[1] + ',' + p.col[2] + ',' + (0.35 * (1 - life) * fadeOut).toFixed(3) + ')';
+                    c.lineWidth = 0.8;
+                    c.beginPath();
+                    c.moveTo(cx + bx * R * bp, cy - by * R * bp);
+                    c.lineTo(cx + hx * R * hp, cy - (lift * ct - hz0 * st) * R * hp);
+                    c.stroke();
+                }
                 const x = Math.cos(ang + yaw) * rad;
                 const z0 = Math.sin(ang + yaw) * rad;
                 const y = lift * ct - z0 * st;
@@ -648,7 +671,7 @@
                 let px = cx + x * R * persp;
                 let py = cy - y * R * persp;
                 let col = p.col;
-                let size = p.size * persp * (arrive ? 2 : 1 + 1.5 * ease((k - 0.72) / 0.2));
+                let size = p.size * persp * (0.35 + 0.65 * f) * (arrive ? 2 : 1 + 1.5 * ease((k - 0.72) / 0.2));
                 let fade = fadeOut;
                 if (arrive) {
                     // Les particules vont se poser sur la nouvelle page et prennent sa couleur.
@@ -673,6 +696,24 @@
             }
             if (web) {
                 web(c, cx, cy, R, sec, k, fadeOut);
+            }
+            // Faisceaux du projecteur : pendant l'émission, des rayons fins partent du cœur.
+            const beam = arrive ? 1 - ease(k / 0.25) : ease((k - 0.13) / 0.05) * (1 - ease((k - 0.42) / 0.12));
+            if (beam > 0) {
+                c.lineWidth = 1;
+                for (let i = 0; i < 28; i++) {
+                    const a = i * 0.2244 + sec * 0.3;
+                    const flick = 0.5 + 0.5 * Math.sin(sec * 9 + i * 2.1);
+                    const len = R * (0.35 + 0.5 * flick);
+                    const g = c.createLinearGradient(cx, cy, cx + Math.cos(a) * len, cy + Math.sin(a) * len);
+                    g.addColorStop(0, 'rgba(255, 205, 110, ' + (0.45 * beam * flick).toFixed(3) + ')');
+                    g.addColorStop(1, 'rgba(255, 205, 110, 0)');
+                    c.strokeStyle = g;
+                    c.beginPath();
+                    c.moveTo(cx, cy);
+                    c.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len);
+                    c.stroke();
+                }
             }
             // Lueur du noyau galactique.
             const glow = (arrive ? 1 - ease((k - 0.15) / 0.35) : ease((k - 0.2) / 0.2)) * fadeOut;

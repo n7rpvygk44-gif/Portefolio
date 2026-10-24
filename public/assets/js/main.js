@@ -108,13 +108,44 @@
     }
 
     // Compétence choisie depuis l'accueil (#b1-2…) : elle est placée au centre de l'écran.
-    function centerTarget() {
+    // Le navigateur saute d'abord en haut de l'encadré, puis la page bouge encore (polices,
+    // animations) : on recentre plusieurs fois, sauf si le visiteur a commencé à défiler.
+    function targetCompetence() {
         const id = decodeURIComponent(location.hash.slice(1));
         const target = id ? document.getElementById(id) : null;
-        if (target && target.classList.contains('competence')) {
-            target.scrollIntoView({ block: 'center', behavior: 'instant' });
+        return target && target.classList.contains('competence') ? target : null;
+    }
+    function centerTarget() {
+        const target = targetCompetence();
+        if (!target) {
+            return;
+        }
+        // Position réelle dans la page, sans les transformations d'animation.
+        let top = 0;
+        for (let el = target; el; el = el.offsetParent) {
+            top += el.offsetTop;
+        }
+        const header = document.querySelector('.site-header');
+        const pinned = header && ['sticky', 'fixed'].includes(getComputedStyle(header).position);
+        const headerHeight = pinned ? header.offsetHeight : 0;
+        const room = window.innerHeight - headerHeight;
+        const offset = target.offsetHeight < room ? (room - target.offsetHeight) / 2 : 16;
+        window.scrollTo(0, Math.max(0, top - headerHeight - offset));
+    }
+    if (targetCompetence()) {
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        let userScrolled = false;
+        const stop = () => { userScrolled = true; };
+        ['wheel', 'touchstart', 'keydown'].forEach((type) => window.addEventListener(type, stop, { once: true, passive: true }));
+        const again = () => { if (!userScrolled) { centerTarget(); } };
+        again();
+        document.addEventListener('DOMContentLoaded', again);
+        window.addEventListener('load', () => { again(); [150, 500, 1200, 2500, 3200].forEach((ms) => setTimeout(again, ms)); });
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(again);
         }
     }
-    window.addEventListener('load', () => requestAnimationFrame(centerTarget));
     window.addEventListener('hashchange', centerTarget);
 })();
