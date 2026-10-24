@@ -276,6 +276,159 @@
         };
     }
 
+
+    // ----- Ouverture du Radiant : jaillissement de particules qui forment une galaxie -----
+    // Les particules (or, argent, bleu, rouge, vert, violet) sortent du cœur en spirale,
+    // s'organisent en galaxie à bras spiraux entourée d'une sphère de poussière lumineuse,
+    // tournent comme une vraie galaxie (plus vite au centre), puis envahissent la pièce.
+    // Les étapes sont exprimées en fraction de la durée de l'introduction.
+    function radiantGalaxy(total) {
+        const canvas = document.createElement('canvas');
+        canvas.className = 'radiant-galaxy';
+        canvas.setAttribute('aria-hidden', 'true');
+        const c = canvas.getContext('2d');
+        const small = window.innerWidth < 760;
+        const count = small ? 2400 : 6500;
+        const palette = [
+            [255, 214, 130, 0.34],   // or
+            [235, 238, 245, 0.28],   // argent
+            [150, 200, 255, 0.12],   // bleu
+            [255, 120, 110, 0.08],   // rouge
+            [140, 235, 170, 0.08],   // vert
+            [200, 150, 255, 0.10],   // violet
+        ];
+        const pick = () => {
+            let r = Math.random();
+            for (const col of palette) {
+                if ((r -= col[3]) <= 0) {
+                    return col;
+                }
+            }
+            return palette[0];
+        };
+        const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+        const parts = [];
+        for (let i = 0; i < count; i++) {
+            const kind = Math.random();
+            const p = { col: pick(), size: Math.random() < 0.1 ? 2.6 : 0.9 + Math.random() * 1.4, tw: Math.random() * 6.28 };
+            if (kind < 0.62) {
+                // Bras spiraux (galaxie à 3 bras), disque fin.
+                const arm = Math.floor(Math.random() * 3);
+                const r = Math.pow(Math.random(), 0.7);
+                p.r = 0.08 + r * 0.92;
+                p.a = arm * 2.094 + p.r * 4.2 + gauss() * 0.35;
+                p.y = gauss() * 0.05 * (1.2 - p.r);
+            } else if (kind < 0.8) {
+                // Bulbe central.
+                p.r = Math.abs(gauss()) * 0.22;
+                p.a = Math.random() * 6.28;
+                p.y = gauss() * 0.12;
+            } else {
+                // Sphère de poussière qui enveloppe la galaxie.
+                const u = Math.random() * 2 - 1;
+                p.sphere = true;
+                p.r = Math.sqrt(1 - u * u) * 1.15;
+                p.a = Math.random() * 6.28;
+                p.y = u * 1.15;
+            }
+            p.emit = 0.17 + Math.random() * 0.2;     // moment où la particule jaillit
+            p.flight = 0.12 + Math.random() * 0.1;   // durée du vol jusqu'à sa place
+            p.swirl = 2.5 + Math.random() * 2.5;     // tours de spirale pendant le vol
+            parts.push(p);
+        }
+
+        let w = 0, h = 0, dpr = 1;
+        function resize() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        let t0 = 0;
+        let frame = 0;
+        const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+        function draw(now) {
+            if (!t0) {
+                t0 = now;
+            }
+            const sec = (now - t0) / 1000;
+            const k = sec / total;                       // avancement 0..1
+            c.setTransform(dpr, 0, 0, dpr, 0, 0);
+            c.clearRect(0, 0, w, h);
+            c.globalCompositeOperation = 'lighter';
+            const cx = w / 2, cy = h / 2;
+            // Taille de la galaxie : elle grandit puis envahit la pièce à la fin.
+            const base = Math.min(w, h) * 0.42;
+            const R = base * (1 + 2.2 * ease((k - 0.72) / 0.2));
+            const tilt = 1.05 - 0.35 * ease((k - 0.4) / 0.4);      // le disque se redresse
+            const yaw = sec * 0.12;
+            const ct = Math.cos(tilt), st = Math.sin(tilt);
+            const fadeOut = 1 - ease((k - 0.86) / 0.08);
+            for (let i = 0; i < parts.length; i++) {
+                const p = parts[i];
+                const life = (k - p.emit) / p.flight;
+                if (life <= 0) {
+                    continue;
+                }
+                const f = ease(life);
+                // Rotation différentielle : le centre tourne plus vite que le bord.
+                const spin = p.sphere ? sec * 0.08 : sec * (0.5 / (0.25 + p.r));
+                const ang = p.a + spin + (1 - f) * p.swirl * 6.28;
+                const rad = p.r * f;
+                const lift = p.y * f + (1 - f) * Math.sin(life * 3.14) * 0.35;  // arc du jaillissement
+                const x = Math.cos(ang + yaw) * rad;
+                const z0 = Math.sin(ang + yaw) * rad;
+                const y = lift * ct - z0 * st;
+                const z = lift * st + z0 * ct;
+                const persp = 2.4 / (2.4 + z);
+                const px = cx + x * R * persp;
+                const py = cy - y * R * persp;
+                if (px < -10 || py < -10 || px > w + 10 || py > h + 10) {
+                    continue;
+                }
+                const twinkle = 0.6 + 0.4 * Math.sin(sec * 3 + p.tw);
+                const alpha = Math.min(1, life * 2) * twinkle * fadeOut * (0.6 + 0.4 * persp);
+                const size = p.size * persp * (1 + 1.5 * ease((k - 0.72) / 0.2));
+                c.fillStyle = 'rgba(' + p.col[0] + ',' + p.col[1] + ',' + p.col[2] + ',' + alpha.toFixed(3) + ')';
+                if (p.size > 2) {
+                    // Étoiles brillantes : un point rond entouré d'un halo doux.
+                    c.beginPath();
+                    c.arc(px, py, size * 0.45, 0, 6.283);
+                    c.fill();
+                    c.globalAlpha = 0.2;
+                    c.beginPath();
+                    c.arc(px, py, size * 1.3, 0, 6.283);
+                    c.fill();
+                    c.globalAlpha = 1;
+                } else {
+                    c.fillRect(px - size / 2, py - size / 2, size, size);
+                }
+            }
+            // Lueur du noyau galactique.
+            const glow = ease((k - 0.2) / 0.2) * fadeOut;
+            if (glow > 0) {
+                const g = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.35);
+                g.addColorStop(0, 'rgba(255, 236, 190, ' + (0.45 * glow) + ')');
+                g.addColorStop(1, 'rgba(255, 200, 120, 0)');
+                c.fillStyle = g;
+                c.fillRect(cx - R, cy - R, R * 2, R * 2);
+            }
+            c.globalCompositeOperation = 'source-over';
+            if (k < 1) {
+                frame = requestAnimationFrame(draw);
+            }
+        }
+        return {
+            canvas,
+            start() { frame = requestAnimationFrame(draw); },
+            stop() { cancelAnimationFrame(frame); window.removeEventListener('resize', resize); },
+        };
+    }
+
     // ----- Décor : Trantor -----
     const scene = document.createElement('div');
     scene.className = 'fondation-scene';
@@ -512,7 +665,8 @@
     skip.type = 'button';
     skip.className = 'skip';
     skip.textContent = 'Passer l\'introduction';
-    intro.append(stage, title, gate, skip);
+    const galaxy = radiantGalaxy(T.total);
+    intro.append(stage, galaxy.canvas, title, gate, skip);
     document.body.appendChild(intro);
 
     let done = false;
@@ -522,6 +676,7 @@
             return;
         }
         done = true;
+        galaxy.stop();
         intro.remove();
         document.removeEventListener('keydown', onKey);
         start();
@@ -533,6 +688,7 @@
         running = true;
         intro.classList.add('active');
         introCore.radiant.wake(1);
+        galaxy.start();
         if (window.portfolioSound) {
             if (seen) {
                 window.portfolioSound.playIntro(T, 'short');

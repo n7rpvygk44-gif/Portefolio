@@ -503,3 +503,23 @@
 .radiant-intro .ring circle.dash { stroke-width: 1; opacity: 0.7; }
 .radiant-intro .ring text { fill: #8a5a12; font-weight: 600; }
 .radiant-intro .ring svg { filter: drop-shadow(0 0 2px rgba(243, 192, 99, 0.8)); }
+
+/* Ouverture du Radiant : la pièce s'assombrit, la galaxie de particules se forme, puis la lumière revient.
+   Les étapes suivent la durée de l'introduction (--turn). */
+.radiant-galaxy { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.radiant-intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, #1c1a22 0%, #0b0c12 70%);
+    opacity: 0;
+    pointer-events: none;
+}
+.radiant-intro.active::before { animation: room-dark var(--turn, 12s) ease-in-out forwards; }
+.radiant-intro.active .title { animation: title-night var(--turn, 12s) ease-in-out forwards; }
+.radiant-intro.active .title span { animation: title-night-sub var(--turn, 12s) ease-in-out forwards; }
+.radiant-intro.active .skip { color: #d8cfbd; border-color: rgba(216, 207, 189, 0.4); }
+@keyframes room-dark { 0%, 12% { opacity: 0; } 24%, 82% { opacity: 1; } 95%, 100% { opacity: 0; } }
+@keyframes title-night { 0%, 12% { color: var(--text); } 24%, 82% { color: #f3ead6; } 95%, 100% { color: var(--text); } }
+@keyframes title-night-sub { 0%, 12% { color: var(--accent); } 24%, 82% { color: var(--glow); } 95%, 100% { color: var(--accent); } }
+.radiant-intro .title, .radiant-intro .gate, .radiant-intro .skip { z-index: 3; }
