@@ -77,18 +77,18 @@
         // 6. Cordes en étoile : chaque sommet relié aux sommets non voisins, à travers le volume.
         ICO_VERTS.forEach((v, i) => ICO_VERTS.forEach((u, j) => {
             if (j > i && !ICO_EDGES.some((e) => (e.a === i && e.b === j) || (e.a === j && e.b === i)) && Math.hypot(v[0] + u[0], v[1] + u[1], v[2] + u[2]) > 0.2) {
-                lines.push([v, u, 0.15, 'chord']);
+                lines.push([v, u, 0.15]);
             }
         }));
         // Paillettes : quelques grains brillants posés le long de chaque fil.
-        lines.forEach((line) => { line[4] = [Math.random(), Math.random(), Math.random()]; line[5] = Math.random() * 6.28; });
+        lines.forEach((line) => { line.push([Math.random(), Math.random(), Math.random()], Math.random() * 6.28); });
         return lines;
     })();
 
     // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
-    // speed (rotation), static (une seule image), chords (cordes en étoile à travers le volume).
+    // speed (rotation), static (une seule image).
     function radiantPrime(options) {
-        const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true, chords: true }, options);
+        const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true }, options);
         const canvas = document.createElement('canvas');
         canvas.className = 'radiant-prime';
         canvas.setAttribute('aria-hidden', 'true');
@@ -150,10 +150,7 @@
             const thin = Math.max(0.6, w / 360);
             const groups = new Map();
             const grains = [];
-            LATTICE.forEach(([A, B, at, kind, seeds, tw]) => {
-                if (kind === 'chord' && !opts.chords) {
-                    return;
-                }
+            LATTICE.forEach(([A, B, at, seeds, tw]) => {
                 const a = project(A), b = project(B);
                 const zMid = (a[2] + b[2]) / 2;
                 const bucket = zMid > 0.25 ? 0 : zMid > -0.25 ? 1 : 2;
@@ -754,8 +751,8 @@
     // Le Radiant au centre d'une scène : un canvas 3D, ou rien si les animations sont réduites
     // (dans ce cas une image fixe est dessinée).
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches || root.classList.contains('a11y-motion');
-    function core(size, level, observe, chords) {
-        const r = radiantPrime({ size, level: level === undefined ? 1 : level, static: calm, observe: observe !== false, chords: chords !== false });
+    function core(size, level, observe) {
+        const r = radiantPrime({ size, level: level === undefined ? 1 : level, static: calm, observe: observe !== false });
         r.canvas.classList.add('radiant-core');
         r.canvas.radiant = r;
         return r.canvas;
@@ -895,8 +892,7 @@
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    // Le Radiant de l'introduction n'a pas de cordes en étoile (choix d'Olivier).
-    const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false, false);
+    const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false);
     stage.append(sphere('sphere', T.rings), introCore);
     // Les anneaux de l'introduction sont posés directement dans la scène.
     const introSphere = stage.firstChild;
