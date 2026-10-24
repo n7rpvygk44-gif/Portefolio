@@ -8,6 +8,7 @@ $menu = [
     '/synthese' => 'Synthèse E5',
     '/veille' => 'Veille',
     '/base-de-connaissances' => 'Base de connaissances',
+    '/supervision' => 'Supervision',
     '/contact' => 'Contact',
 ];
 $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_with($path, $href);
@@ -31,6 +32,7 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
     <?php endif; ?>
     <script src="<?= e(asset('/assets/js/main.js')) ?>" defer></script>
     <script src="<?= e(asset('/assets/js/sound.js')) ?>" defer></script>
+    <script src="<?= e(asset('/assets/js/supervision.js')) ?>" defer></script>
     <?php if (Theme::hasScript($theme)): ?>
         <script src="<?= e(asset('/assets/js/themes/' . $theme . '.js')) ?>" defer></script>
     <?php endif; ?>

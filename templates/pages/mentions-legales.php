@@ -21,6 +21,7 @@
 <p>
     Ce site ne collecte aucune donnée personnelle : il n'a pas de formulaire, pas de mesure d'audience et ne dépose aucun cookie.
     Les réglages choisis (accessibilité, son activé ou coupé) sont enregistrés uniquement dans votre navigateur et ne sont envoyés nulle part.
+    La page Supervision mesure le chargement des pages (poids, temps, fluidité) directement dans votre navigateur ; ces mesures restent dans l'onglet ouvert et disparaissent à sa fermeture.
 </p>
 <p>L'hébergeur peut conserver des journaux techniques de connexion (adresse IP, date), comme tout serveur web.</p>
 

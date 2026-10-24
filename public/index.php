@@ -146,6 +146,10 @@ switch (true) {
         View::render('pages/contact', $page('Contact', "Contacter $name."));
         break;
 
+    case $path === '/supervision':
+        View::render('pages/supervision', $page('Supervision', "Supervision en temps réel des données consommées par le portfolio de $name : flux réseau, latence, fluidité et signaux vitaux."));
+        break;
+
     case $path === '/mentions-legales':
         View::render('pages/mentions-legales', $page('Mentions légales', "Mentions légales et données personnelles du portfolio de $name."));
         break;

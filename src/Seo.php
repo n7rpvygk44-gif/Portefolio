@@ -13,7 +13,7 @@ final class Seo
     // Liste de toutes les pages publiques, utilisée pour le sitemap.
     public static function pages(JsonStore $store): array
     {
-        $paths = ['/', '/parcours', '/competences', '/realisations', '/synthese', '/veille', '/base-de-connaissances', '/contact', '/mentions-legales'];
+        $paths = ['/', '/parcours', '/competences', '/realisations', '/synthese', '/veille', '/base-de-connaissances', '/contact', '/supervision', '/mentions-legales'];
         foreach ($store->read('realisations') as $item) {
             $paths[] = '/realisations/' . $item['slug'];
         }

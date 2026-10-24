@@ -218,3 +218,23 @@ td.check { text-align: center; color: var(--accent); font-weight: 700; }
 .skill-list li:last-child { border-bottom: none; }
 .skill-list .meta { white-space: nowrap; }
 .portrait { float: right; width: 160px; height: 160px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border); margin: 0 0 1rem 1rem; }
+
+/* ===== Supervision (mesures en temps réel, supervision.js) ===== */
+.supervision-note { color: var(--muted); font-size: 0.92rem; max-width: 70ch; }
+.supervision { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 1.5rem 0 2rem; }
+.sv-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem 1.1rem; min-width: 0; }
+.sv-wide { grid-column: 1 / -1; }
+.sv-panel h2 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+.sv-help { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.88rem; }
+.sv-canvas { display: block; max-width: 100%; }
+.sv-stats { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 0.75rem 0 0; }
+.sv-stats div { min-width: 7rem; }
+.sv-stats dt { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.sv-stats dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; }
+.sv-legend { list-style: none; margin: 0.6rem 0 0; padding: 0; font-size: 0.85rem; color: var(--muted); columns: 2 12rem; }
+.sv-legend li { break-inside: avoid; }
+.sv-legend .sv-total { color: var(--text); font-weight: 600; column-span: all; margin-top: 0.3rem; }
+.sv-swatch { display: inline-block; width: 0.7em; height: 0.7em; border-radius: 50%; margin-right: 0.4em; vertical-align: baseline; }
+@media (max-width: 760px) {
+    .supervision { grid-template-columns: 1fr; }
+}
