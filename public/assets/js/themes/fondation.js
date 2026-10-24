@@ -85,15 +85,6 @@
         return lines;
     })();
 
-    // Orbites des électrons autour du cœur : rayon (en fraction du Radiant), inclinaison,
-    // orientation, vitesse, nombre d'électrons.
-    const ORBITS = [
-        { r: 0.58, tilt: 1.25, spin: 0, speed: 1.6, count: 2, phase: 0, precess: 0.05 },
-        { r: 0.62, tilt: 1.25, spin: 2.09, speed: -1.3, count: 2, phase: 1.2, precess: -0.04 },
-        { r: 0.66, tilt: 1.25, spin: 4.19, speed: 1.1, count: 2, phase: 2.4, precess: 0.03 },
-        { r: 0.4, tilt: 0.2, spin: 0.8, speed: 2.2, count: 1, phase: 0.5, precess: 0.06 },
-    ];
-
     // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
     // speed (rotation), static (une seule image).
     function radiantPrime(options) {
@@ -206,86 +197,6 @@
             }
             c.globalAlpha = 1;
 
-            // Électrons : comme autour du noyau d'un atome, des particules lumineuses gravitent
-            // autour du cœur sur des orbites inclinées. Celles qui passent derrière sont dessinées
-            // avant le cœur, plus pâles ; celles de devant après.
-            const electrons = [];
-            const orbitLines = [];
-            ORBITS.forEach((o) => {
-                const tilt = o.tilt + time * o.precess;
-                const ct = Math.cos(tilt), st = Math.sin(tilt), cs = Math.cos(o.spin), ss = Math.sin(o.spin);
-                const place = (ang) => {
-                    // Cercle dans son plan, incliné (tilt) puis tourné (spin) dans l'espace.
-                    const x0 = Math.cos(ang) * o.r, y0 = Math.sin(ang) * o.r;
-                    const y1 = y0 * ct, z1 = y0 * st;
-                    const x2 = x0 * cs - z1 * ss, z2 = x0 * ss + z1 * cs;
-                    const k = 3.2 / (3.2 + z2);
-                    return [cx + x2 * R * k, cy - y1 * R * k, z2];
-                };
-                const path = [];
-                for (let i = 0; i <= 48; i++) {
-                    path.push(place((i / 48) * 6.283));
-                }
-                orbitLines.push(path);
-                for (let e = 0; e < o.count; e++) {
-                    const ang = o.phase + e * (6.283 / o.count) + time * o.speed;
-                    const trail = [];
-                    for (let t = 0; t < 6; t++) {
-                        trail.push(place(ang - t * 0.09 * Math.sign(o.speed)));
-                    }
-                    electrons.push(trail);
-                }
-            });
-            const drawOrbits = () => {
-                // Orbites argentées, pour se détacher du treillis doré.
-                c.strokeStyle = 'rgba(120, 128, 145, ' + (0.8 * (0.4 + 0.6 * glow)).toFixed(3) + ')';
-                c.lineWidth = Math.max(0.6, w / 380);
-                c.beginPath();
-                orbitLines.forEach((path) => path.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))));
-                c.stroke();
-            };
-            const drawElectrons = (front) => {
-                const es = Math.max(2.5, w / 42);
-                electrons.forEach((trail) => {
-                    if ((trail[0][2] < 0) !== front) {
-                        return;
-                    }
-                    const dim = front ? 1 : 0.45;
-                    for (let t = trail.length - 1; t > 0; t--) {
-                        c.globalAlpha = dim * (1 - t / trail.length) * 0.6;
-                        c.fillStyle = '#b8862c';
-                        c.beginPath();
-                        c.arc(trail[t][0], trail[t][1], es * (0.5 - t * 0.05), 0, 6.283);
-                        c.fill();
-                    }
-                    const [x, y] = trail[0];
-                    const halo = c.createRadialGradient(x, y, 0, x, y, es * 2.2);
-                    halo.addColorStop(0, 'rgba(255, 250, 230, ' + dim + ')');
-                    halo.addColorStop(0.35, 'rgba(255, 214, 130, ' + (0.7 * dim) + ')');
-                    halo.addColorStop(1, 'rgba(255, 200, 110, 0)');
-                    c.globalAlpha = 1;
-                    c.fillStyle = halo;
-                    c.fillRect(x - es * 2.2, y - es * 2.2, es * 4.4, es * 4.4);
-                    // Noyau de l'électron : point doré cerclé de blanc, lisible sur l'ivoire.
-                    c.globalAlpha = dim;
-                    c.fillStyle = '#8a6420';
-                    c.beginPath();
-                    c.arc(x, y, es * 0.5, 0, 6.283);
-                    c.fill();
-                    c.fillStyle = '#e9b24a';
-                    c.beginPath();
-                    c.arc(x, y, es * 0.4, 0, 6.283);
-                    c.fill();
-                    c.fillStyle = '#fffaf0';
-                    c.beginPath();
-                    c.arc(x, y, es * 0.22, 0, 6.283);
-                    c.fill();
-                    c.globalAlpha = 1;
-                });
-                c.globalAlpha = 1;
-            };
-            drawOrbits();
-            drawElectrons(false);
 
             // Cœur : un petit cristal blanc éblouissant, entouré d'une aura dorée.
             if (glow > 0.02) {
@@ -320,7 +231,6 @@
                     c.stroke();
                 }
             }
-            drawElectrons(true);
         }
 
         function loop(now) {
