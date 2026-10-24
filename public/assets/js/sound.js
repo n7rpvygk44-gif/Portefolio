@@ -363,7 +363,8 @@
             return;
         }
         resumed = true;
-        wake(() => { glass(1318.5, 0, 0.08, 2.5); startAmbient(3); });
+        // Pages suivantes : pas de mélodie, seulement la reprise de l'ambiance.
+        wake(() => startAmbient(3));
     };
     document.addEventListener('pointerdown', resume, true);
     document.addEventListener('keydown', resume, true);
@@ -418,7 +419,8 @@
                 ctx.resume().then(() => {
                     if (ctx.state === 'running') {
                         resumed = true;
-                        intro(timeline, true);
+                        // La mélodie d'ouverture est réservée à la page de garde.
+                        startAmbient(1.5);
                     }
                 }).catch(() => {});
                 return;
