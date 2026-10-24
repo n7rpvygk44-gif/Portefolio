@@ -86,9 +86,9 @@
     })();
 
     // Crée un Radiant dans un canvas. options : size (px), level (0..1 éclat du cœur et du treillis),
-    // speed (rotation), static (une seule image).
+    // speed (rotation), static (une seule image), swarm (essaim de particules en gravitation autour du cœur).
     function radiantPrime(options) {
-        const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true }, options);
+        const opts = Object.assign({ size: 200, level: 1, speed: 1, static: false, observe: true, swarm: false }, options);
         const canvas = document.createElement('canvas');
         canvas.className = 'radiant-prime';
         canvas.setAttribute('aria-hidden', 'true');
@@ -104,6 +104,28 @@
             canvas.style.height = size + 'px';
         }
         resize(size);
+
+        // Essaim : des particules gravitent à l'intérieur du Radiant, chacune sur sa propre orbite
+        // inclinée autour du cœur ; plus elles sont proches du cœur, plus elles tournent vite.
+        const swarm = [];
+        if (opts.swarm) {
+            const n = Math.round(Math.min(360, Math.max(170, opts.size * 1.3)));
+            for (let i = 0; i < n; i++) {
+                // Plan d'orbite au hasard : deux axes perpendiculaires u et v.
+                const th = Math.random() * 6.283, ph = Math.acos(Math.random() * 2 - 1);
+                const nx = Math.sin(ph) * Math.cos(th), ny = Math.cos(ph), nz = Math.sin(ph) * Math.sin(th);
+                const ref = Math.abs(ny) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+                let u = [ref[1] * nz - ref[2] * ny, ref[2] * nx - ref[0] * nz, ref[0] * ny - ref[1] * nx];
+                const ul = Math.hypot(u[0], u[1], u[2]);
+                u = u.map((x) => x / ul);
+                const v = [ny * u[2] - nz * u[1], nz * u[0] - nx * u[2], nx * u[1] - ny * u[0]];
+                const r = 0.14 + Math.pow(Math.random(), 0.8) * 0.6;
+                swarm.push({ u, v, r, a: Math.random() * 6.283, w: (0.35 + Math.random() * 0.3) / Math.sqrt(r) * (Math.random() < 0.8 ? 1 : -1),
+                    col: dustColour(), size: Math.random() < 0.1 ? 2.2 : 0.9 + Math.random() * 0.7, tw: Math.random() * 6.283 });
+            }
+        }
+        let release = 0;     // 0 : essaim en place ; monte vers 1 quand le Radiant s'active et le libère.
+        let releasing = false;
 
         let level = opts.level;
         let target = opts.level;
@@ -197,6 +219,30 @@
             }
             c.globalAlpha = 1;
 
+            // Essaim : positions du moment, puis particules de l'arrière dessinées avant le cœur,
+            // celles de l'avant après lui.
+            const motes = [];
+            if (swarm.length && release < 1) {
+                const out = 1 + 1.6 * release * release;   // libéré, l'essaim s'élargit et s'efface
+                for (const m of swarm) {
+                    const ang = m.a + time * m.w;
+                    const ca = Math.cos(ang) * m.r * out, sa = Math.sin(ang) * m.r * out;
+                    const pt = project([m.u[0] * ca + m.v[0] * sa, m.u[1] * ca + m.v[1] * sa, m.u[2] * ca + m.v[2] * sa]);
+                    const twinkle = 0.65 + 0.35 * Math.sin(time * 2.5 + m.tw);
+                    motes.push([pt, m, twinkle]);
+                }
+            }
+            const drawMotes = (front) => {
+                const sc = Math.max(1.4, w / 130);
+                for (const [pt, m, twinkle] of motes) {
+                    if ((pt[2] < 0) !== front) {
+                        continue;
+                    }
+                    const depth = front ? 1 : 0.55;
+                    dot(c, pt[0], pt[1], m.size * sc * (3.2 / (3.2 + pt[2])), m.col, Math.min(1, 0.95 * depth * twinkle * (1 - release)));
+                }
+            };
+            drawMotes(false);
 
             // Cœur : un petit cristal blanc éblouissant, entouré d'une aura dorée.
             if (glow > 0.02) {
@@ -231,6 +277,7 @@
                     c.stroke();
                 }
             }
+            drawMotes(true);
         }
 
         function loop(now) {
@@ -239,6 +286,9 @@
             last = now;
             time += dt;
             level += (target - level) * Math.min(1, dt * 2.5);
+            if (releasing) {
+                release = Math.min(1, release + dt / 1.4);
+            }
             if (target > 0.3) {
                 fade = Math.min(1.3, fade + dt * 0.55);
             }
@@ -273,6 +323,8 @@
             // Éveil : le cœur s'allume et le treillis s'illumine progressivement.
             wake(level0) {
                 target = level0 === undefined ? 1 : level0;
+                // À l'activation, l'essaim quitte le cœur : la galaxie prend le relais.
+                releasing = true;
                 fade = Math.min(fade, 0.2);
                 if (!frame && !opts.static) {
                     last = 0;
@@ -986,8 +1038,8 @@
     // Le Radiant au centre d'une scène : un canvas 3D, ou rien si les animations sont réduites
     // (dans ce cas une image fixe est dessinée).
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches || root.classList.contains('a11y-motion');
-    function core(size, level, observe) {
-        const r = radiantPrime({ size, level: level === undefined ? 1 : level, static: calm, observe: observe !== false });
+    function core(size, level, observe, swarm) {
+        const r = radiantPrime({ size, level: level === undefined ? 1 : level, static: calm, observe: observe !== false, swarm: !!swarm });
         r.canvas.classList.add('radiant-core');
         r.canvas.radiant = r;
         return r.canvas;
@@ -996,11 +1048,11 @@
     // ----- Le Radiant de l'accueil -----
     const radiant = document.querySelector('.radiant');
     if (radiant) {
-        radiant.prepend(sphere('radiant-sphere'), core(window.innerWidth > 760 ? 170 : 130));
+        radiant.prepend(sphere('radiant-sphere'), core(window.innerWidth > 760 ? 170 : 130, 1, true, true));
     }
     const hero = document.querySelector('.hero');
     if (hero) {
-        const heroRadiant = core(170, 0.85);
+        const heroRadiant = core(170, 0.85, true, true);
         heroRadiant.classList.add('hero-radiant');
         hero.appendChild(heroRadiant);
     }
@@ -1127,7 +1179,7 @@
     const stage = document.createElement('div');
     stage.className = 'stage';
     stage.setAttribute('aria-hidden', 'true');
-    const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false);
+    const introCore = core(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.32), seen ? 1 : 0.15, false, !seen);
     stage.append(sphere('sphere', T.rings), introCore);
     // Les anneaux de l'introduction sont posés directement dans la scène.
     const introSphere = stage.firstChild;
