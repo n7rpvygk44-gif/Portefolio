@@ -396,12 +396,8 @@
         }
     }
 
-    // Réseau du Radiant (introduction complète) : une sphère de verre maillée enveloppe le Radiant ;
-    // un filet de poussière monte du cœur, puis des filaments dorés relient des points répartis
-    // dans la sphère, comme une toile cosmique.
+    // Sphère du Radiant (introduction complète) : une paroi de verre maillée enveloppe le Radiant.
     function radiantWeb() {
-        const rnd = (a, b) => a + Math.random() * (b - a);
-        const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
         // Maille de la sphère : points répartis régulièrement (spirale de Fibonacci).
         const mesh = [];
         const meshCount = window.innerWidth < 760 ? 420 : 900;
@@ -411,45 +407,6 @@
             const a = i * 2.39996;
             mesh.push([Math.cos(a) * r, y, Math.sin(a) * r]);
         }
-        // Nœuds répartis en couronne dans la moitié haute de la sphère.
-        const nodes = [];
-        const nodeCount = 8;
-        for (let i = 0; i < nodeCount; i++) {
-            const a = (i / nodeCount) * 6.283 + rnd(-0.25, 0.25);
-            const r = rnd(0.55, 0.85);
-            const y = rnd(-0.15, 0.6);
-            nodes.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r] });
-        }
-        // Filaments : une chaîne qui fait le tour, deux liaisons transverses, et le filet qui monte du cœur.
-        const links = [[-1, 0]];
-        for (let i = 0; i < nodeCount - 1; i++) {
-            links.push([i, i + 1]);
-        }
-        links.push([1, 5], [3, 7]);
-        const FIL = [[200, 140, 30], [214, 160, 60], [120, 132, 152], [40, 160, 150]];
-        const edges = links.map(([a, b], index) => {
-            const A = a < 0 ? [0, -0.05, 0] : nodes[a].p;
-            const B = nodes[b].p;
-            // Point de contrôle poussé vers la paroi : le filament épouse la courbure de la sphère.
-            const M = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2];
-            const len = Math.hypot(M[0], M[1], M[2]) || 1;
-            const push = a < 0 ? 1 : 0.92 / len;
-            const C = [M[0] * push + gauss() * 0.15, M[1] * push + gauss() * 0.15, M[2] * push + gauss() * 0.15];
-            const grains = [];
-            const n = a < 0 ? 220 : 420;
-            for (let i = 0; i < n; i++) {
-                const r = Math.random();
-                grains.push({
-                    u: Math.random(), speed: rnd(0.04, 0.14), tw: Math.random() * 6.28,
-                    off: [gauss() * 0.05, gauss() * 0.05, gauss() * 0.05],
-                    col: r < 0.68 ? FIL[0] : r < 0.8 ? FIL[1] : r < 0.92 ? FIL[2] : FIL[3],
-                    size: Math.random() < 0.06 ? 2.2 : rnd(0.6, 1.4),
-                });
-            }
-            return { A, B, C, a, b, grains, start: 0.32 + index * 0.022 };
-        });
-        const bez = (e, u, i) => (1 - u) * (1 - u) * e.A[i] + 2 * (1 - u) * u * e.C[i] + u * u * e.B[i];
-
         return function draw(c, cx, cy, R, sec, k, fade) {
             const appear = ease((k - 0.28) / 0.1) * fade;
             if (appear <= 0) {
@@ -483,33 +440,6 @@
                 const alpha = (0.14 + 0.6 * rim * rim) * appear * (q[2] > 0 ? 0.6 : 1);
                 c.fillStyle = 'rgba(120, 132, 152, ' + alpha.toFixed(3) + ')';
                 c.fillRect(q[0] - 0.75, q[1] - 0.75, 1.5, 1.5);
-            }
-            // Filaments de poussière qui coulent d'un nœud à l'autre.
-            for (const e of edges) {
-                const grow = ease((k - e.start) / 0.09);
-                if (grow <= 0) {
-                    continue;
-                }
-                // Âme du filament : un trait doré léger sous la poussière.
-                c.strokeStyle = 'rgba(200, 145, 40, ' + (0.4 * appear).toFixed(3) + ')';
-                c.lineWidth = 1.2;
-                c.beginPath();
-                for (let i = 0; i <= 28; i++) {
-                    const u = (i / 28) * grow;
-                    const q = project(bez(e, u, 0), bez(e, u, 1), bez(e, u, 2));
-                    if (i === 0) { c.moveTo(q[0], q[1]); } else { c.lineTo(q[0], q[1]); }
-                }
-                c.stroke();
-                for (const g of e.grains) {
-                    const u = (g.u + sec * g.speed) % 1;
-                    if (u > grow) {
-                        continue;
-                    }
-                    const thick = Math.sin(u * 3.1416) + 0.25;
-                    const q = project(bez(e, u, 0) + g.off[0] * thick, bez(e, u, 1) + g.off[1] * thick, bez(e, u, 2) + g.off[2] * thick);
-                    const twinkle = 0.55 + 0.45 * Math.sin(sec * 5 + g.tw);
-                    dot(c, q[0], q[1], g.size, g.col, twinkle * appear * 0.95);
-                }
             }
         };
     }
