@@ -17,6 +17,10 @@ return [
     'static' => [
         'base_url' => 'https://n7rpvygk44-gif.github.io/Portefolio',
         'base_path' => '/Portefolio',
+        // Le site officiel est désormais celui de l'école : chaque page de GitHub Pages
+        // renvoie le visiteur vers la même page là-bas (GitHub Pages ne permet pas de vraie
+        // redirection côté serveur, on utilise donc une balise <meta http-equiv="refresh">).
+        'redirect_to' => 'https://olivier.pizelle.mds-nantes.fr',
     ],
 
     // Dossier des données JSON (hors de public/, donc inaccessible depuis le web).

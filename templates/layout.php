@@ -13,6 +13,10 @@ $menu = [
 ];
 $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_with($path, $href);
 ?>
+<?php
+// Copie secondaire : adresse de la même page sur le site officiel (sinon null).
+$official = !empty($config['redirect_to']) ? rtrim($config['redirect_to'], '/') . $path : null;
+?>
 <!DOCTYPE html>
 <html lang="<?= e($config['lang']) ?>">
 <head>
@@ -20,6 +24,11 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($title) ?> | <?= e($siteName) ?></title>
     <meta name="description" content="<?= e($description) ?>">
+    <?php if ($official): ?>
+        <!-- Redirection immédiate vers le site officiel ; Google la traite comme une redirection permanente. -->
+        <meta http-equiv="refresh" content="0; url=<?= e($official) ?>">
+        <?php $canonical = $official; ?>
+    <?php endif; ?>
     <link rel="canonical" href="<?= e($canonical) ?>">
     <meta property="og:type" content="website">
     <meta property="og:title" content="<?= e($title) ?>">
@@ -38,6 +47,9 @@ $isCurrent = fn (string $href) => $href === '/' ? $path === '/' : str_starts_wit
     <?php endif; ?>
 </head>
 <body class="theme-<?= e($theme) ?>">
+<?php if ($official): ?>
+    <p class="redirect-notice">Ce portfolio a déménagé : <a href="<?= e($official) ?>"><?= e($official) ?></a></p>
+<?php endif; ?>
 <a class="skip-link" href="#contenu">Aller au contenu</a>
 <?php if (Theme::preview() !== null): ?>
     <p class="preview-banner">Aperçu du thème « <?= e(Theme::available()[$theme] ?? $theme) ?> » (visible par vous seul) · <a href="?apercu=fin">Quitter l'aperçu</a> · <a href="/admin/apparence">Apparence</a></p>
